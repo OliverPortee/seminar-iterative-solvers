@@ -2,6 +2,9 @@
 
 #set heading(numbering: "1.")
 #set math.equation(numbering: "(1)")
+#set par(justify: true)
+
+#let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
 
 #title[Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
 
@@ -48,6 +51,8 @@ $
 S_h &= S_H plus.o T_h wide u &= v plus w
 $
 
+#hi[TODO: introduce the norm and the seminorm]
+
 = Lemma 3.1
 
 $
@@ -59,7 +64,7 @@ integral_"I" v_xi w_xi = integral_(I_"links") v_xi w_xi + integral_(I_"rechts") 
 $
 da $lr(w_xi|)_(I_"links") = - lr(w_xi|)_(I_"rechts")$ und $v_xi = "const"$.
 
-#highlight[TODO: Couldn't we directly evaluate $integral_("I" + "II") v_xi w_xi + v_eta w_eta$?]
+#hi[TODO: Couldn't we directly evaluate $integral_("I" + "II") v_xi w_xi + v_eta w_eta$?]
 
 $
 integral_"I" v_xi w_xi + v_eta w_eta &= integral_"I" v_eta w_eta \
@@ -72,7 +77,15 @@ integral_"I" v_xi w_xi + v_eta w_eta &= integral_"I" v_eta w_eta \
 &= A_"I" + B_"I" - C_"I" - D_"I"
 $
 
-#highlight[TODO]
+When summing up the term $A$ for all triangles in the triangulation, we simply get
+$
+1/2 integral_Omega v_eta^2 + v_xi^2 =1/2 thin a(v, v) = 1 / 2 thin ||v||^2.
+$ <eq:A>
+
+Similarly, for $B$:
+$
+1/4 integral_Omega w_eta^2 + w_xi^2 = 1/4 thin a(w, w) = 1/4 thin ||w||^2.
+$ <eq:B>
 
 #figure(
 	cetz.canvas({
@@ -86,12 +99,13 @@ $
 		let p4 = (-1, 0)
 		let p5 = (0, 0)
 		
-		line((p4.at(0) - 0.5, 0), (p2.at(0) + 0.5, 0), mark: (end: ">"), name: "xi-axis")
-		line((0, p1.at(1) - 0.3), (0, p3.at(1) + 0.4), mark: (end: ">"), name: "eta-axis")
+		line((p4.at(0) - 0.5, 0), (p2.at(0) + 0.5, 0), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "xi-axis")
+		line((0, p1.at(1) - 0.3), (0, p3.at(1) + 0.4), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "eta-axis")
 		content("xi-axis.end", $xi$, anchor: "north-west", padding: 0.1)
 		content("eta-axis.end", $eta$, anchor: "south-east", padding: 0.1)
 
 		line(p1, p2, p3, p4, close: true)
+		line(p4, p2)
 
 		let r = 2pt
 		circle(p1, radius: r, stroke: none, fill: red)
@@ -152,25 +166,31 @@ $
 D_"I" + D_"II" &>= 1/2 (v_1 - (v_1 + v_3) / 2)^2 + 1/2 (v_3 - (v_1 + v_3) / 2)^2 \
 &= 1/2 ((v_1 - v_3) / 2)^2 + 1/2 ((v_3 - v_1) / 2)^2 \
 &= 1/4 (v_1 - v_3)^2
-$
+$ <eq:D-inequality>
 Therefore, the sum of $D$ over all triangles is
 $
-sum_nu D_nu = sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
+sum_nu D_nu >= sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
 $
 Together with $C$, we get
 $
-sum_nu C_nu + D_nu &= sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
+sum_nu C_nu + D_nu &>= sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= 1/2 sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2 \
 &= 1/2 |v|^2
-$
+$ <eq:CD>
 according to the definition of the seminorm $|dot|$.
 
-#highlight[TODO: explain why we can do this even though there are squares where the green points are north and south, and the red points are west and east.]
+#hi[TODO: explain why we can do this even though there are squares where the green points are north and south, and the red points are west and east.]
+
+#hi[TODO: explain $v$ and $w$ vanish on the boundary so that we don't have to deal with these partial I/II areas]
+
+When summing up the terms for $A$ (@eq:A), $B$ (@eq:B), $C$ and $D$ (@eq:CD), we find that
 
 $
-a(v, w) <= underbrace(1/2 ||v||^2, A) + underbrace(1/4 ||w||^2, B) - underbrace(1/2 |v|^2, C + D) = 1/2 (||v||^2 - |v|^2) + 1/4 ||w||^2
+a(v, w) <= underbrace(1/2 ||v||^2, A) + underbrace(1/4 ||w||^2, B) - underbrace(1/2 |v|^2, C + D) = 1/2 (||v||^2 - |v|^2) + 1/4 ||w||^2.
 $
+
+Notice that we have an inequality ($<=$) here because of @eq:D-inequality.
 
 Interestingly, this upper bound is quadratic in $||w||$ but at the same time, bilinear form $a(v, w)$ is linear in $w$ since $a(v, t w) = t thin a(v, w)$ for $t in RR$ (homogeneity). If we set $w =: t hat(w)$ such that $||hat(w)|| = 1$ and $t > 0$, we get
 $
