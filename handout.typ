@@ -51,23 +51,25 @@ $
 = Lemma 3.1
 
 $
-integral_I v_xi w_xi + v_eta w_eta = integral_I v_xi w_xi + integral_I v_eta w_eta
+integral_"I" v_xi w_xi + v_eta w_eta = integral_"I" v_xi w_xi + integral_"I" v_eta w_eta
 $
 
 $
-integral_I v_xi w_xi = integral_(I_"links") v_xi w_xi + integral_(I_"rechts") v_xi w_xi = 0
+integral_"I" v_xi w_xi = integral_(I_"links") v_xi w_xi + integral_(I_"rechts") v_xi w_xi = 0
 $
 da $lr(w_xi|)_(I_"links") = - lr(w_xi|)_(I_"rechts")$ und $v_xi = "const"$.
 
+#highlight[TODO: Couldn't we directly evaluate $integral_("I" + "II") v_xi w_xi + v_eta w_eta$?]
+
 $
-integral_I v_xi w_xi + v_eta w_eta &= integral_I v_eta w_eta \
-&= integral_I 1/2 v_eta^2 - 1/2 v_eta^2 + 1/2 w_eta^2 - 1/2 w_eta^2 + v_eta w_eta \
-&= integral_I 1/2 (-v_eta^2 + 2 v_eta w_eta - w_eta^2) + 1/2 v_eta^2 + 1/2 w_eta^2 \
-&= integral_I 1/2 v_eta^2 + 1/2 w_eta^2 - 1/2 (v_eta^2 - 2 v_eta w_eta + w_eta^2) \
-&= 1/2 integral_I v_eta^2 + 1/2 integral_I w_eta^2 - 1/2 integral_I (v_eta + w_eta)^2 \
-&= 1/2 integral_I v_eta^2 + 1/2 integral_I v_xi^2 - 1/2 integral_I v_xi^2 + 1/4 integral_I (w_eta^2 + w_eta^2) - 1/2 integral_I (v_eta + w_eta)^2 \
-&= underbrace(1/2 integral_I (v_eta^2 + v_xi^2), A_I) + underbrace(1/4 integral_I (w_eta^2 + w_xi^2), B_I) - underbrace(1/2 integral_I v_xi^2, C_I) - underbrace(1/2 integral_I (v_eta + w_eta)^2, D_I) \
-&= A_I + B_I - C_I - D_I
+integral_"I" v_xi w_xi + v_eta w_eta &= integral_"I" v_eta w_eta \
+&= integral_"I" 1/2 v_eta^2 - 1/2 v_eta^2 + 1/2 w_eta^2 - 1/2 w_eta^2 + v_eta w_eta \
+&= integral_"I" 1/2 (-v_eta^2 + 2 v_eta w_eta - w_eta^2) + 1/2 v_eta^2 + 1/2 w_eta^2 \
+&= integral_"I" 1/2 v_eta^2 + 1/2 w_eta^2 - 1/2 (v_eta^2 - 2 v_eta w_eta + w_eta^2) \
+&= 1/2 integral_"I" v_eta^2 + 1/2 integral_"I" w_eta^2 - 1/2 integral_"I" (v_eta + w_eta)^2 \
+&= 1/2 integral_"I" v_eta^2 + 1/2 integral_"I" v_xi^2 - 1/2 integral_"I" v_xi^2 + 1/4 integral_"I" (w_eta^2 + w_eta^2) - 1/2 integral_"I" (v_eta + w_eta)^2 \
+&= underbrace(1/2 integral_"I" (v_eta^2 + v_xi^2), A_"I") + underbrace(1/4 integral_"I" (w_eta^2 + w_xi^2), B_"I") - underbrace(1/2 integral_"I" v_xi^2, C_"I") - underbrace(1/2 integral_"I" (v_eta + w_eta)^2, D_"I") \
+&= A_"I" + B_"I" - C_"I" - D_"I"
 $
 
 #highlight[TODO]
@@ -103,8 +105,68 @@ $
 		content(p2, $2$, anchor: "north", padding: 0.25)
 		content(p4, $4$, anchor: "north", padding: 0.25)
 		content(p5, $5$, anchor: "north-east", padding: 0.2)
+
+		content((0.5, 0), $h$, anchor: "south", padding: 0.1)
+		content((0, 0.5), $h$, anchor: "west", padding: 0.1)
 	})
 )
+
+Since $v$ is linear in both $"I" = triangle 1 2 4$ and in $"II" = triangle 4 2 3$, $v_xi$ is a constant in both triangles. However, because of the shared boundary $overline(4 2)$, we know that $lr(v_xi|)_"I" = lr(v_xi|)_"II" = (v_2 - v_4) / (2 h)$.
+
+For $C$ we have
+$
+C_"I" + C_"II" &= 1/2 integral_("I" + "II") v_xi^2 \
+&= 1/2 ((v_2 - v_4) / (2 h))^2 dot op("area")("I" + "II") \
+&= 1/2 (v_2 - v_4)^2 / (4 h^2) dot 2 h^2 \
+&= 1/4 (v_2 - v_4)^2.
+$
+
+Summing up this term over the whole domain, we find
+$
+sum_nu C_nu = sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
+$
+
+We know that $w_1 = w_2 = w_3 = w_4 = 0$.
+
+$
+D_"I" + D_"II" &= 1/2 integral_"I" (v_eta - w_eta)^2 + 1/2 integral_"II" (v_eta - w_eta)^2 \
+&= 1/2 lr((v_eta - w_eta)^2|)_"I" dot h^2 + 1/2 lr((v_eta - w_eta)^2|)_"II" dot h^2 \
+&= 1/2 ((v_5 - v_1) / h - (w_5 - w_1) / h)^2 h^2 + 1/2 ((v_3 - v_5) / h - (w_3 - w_5) / h)^2 h^2 \
+&= 1/2 (v_5 - v_1 - w_5 + cancel(w_1))^2 + 1/2 (v_3 - v_5 - cancel(w_3) + w_5)^2 \
+&= 1/2 (v_1 - (v_5 - w_5))^2 + 1/2 (v_3 - (v_5 - w_5))^2
+$
+
+Since we do not know anything aobut $v_5 - w_5$, we resolve to bounding $D_"I" + D_"II"$ by a lower limit (note that $D$ contributes negatively to the total sum $A + B - C - D$). This can be done by substituting $z := v_5 - w_5$,
+$
+D_"I" + D_"II" = 1/2 (v_1 - z)^2 + 1/2 (v_3 - z)^2 =: phi(z).
+$
+This is a quadratic functions that opens upwards and thus has a minimum.
+
+$
+phi'(z) = z - v_1 + z - v_3 = 2z - v_1 - v_3 =^! 0 \
+z_* = (v_1 + v_3) / 2
+$
+
+Using this minimum, we get a lower limit of $D_"I" + D_"II"$.
+$
+D_"I" + D_"II" &>= 1/2 (v_1 - (v_1 + v_3) / 2)^2 + 1/2 (v_3 - (v_1 + v_3) / 2)^2 \
+&= 1/2 ((v_1 - v_3) / 2)^2 + 1/2 ((v_3 - v_1) / 2)^2 \
+&= 1/4 (v_1 - v_3)^2
+$
+Therefore, the sum of $D$ over all triangles is
+$
+sum_nu D_nu = sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
+$
+Together with $C$, we get
+$
+sum_nu C_nu + D_nu &= sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
+&= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
+&= 1/2 sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2 \
+&= 1/2 |v|^2
+$
+according to the definition of the seminorm $|dot|$.
+
+#highlight[TODO: explain why we can do this even though there are squares where the green points are north and south, and the red points are west and east.]
 
 $
 a(v, w) <= underbrace(1/2 ||v||^2, A) + underbrace(1/4 ||w||^2, B) - underbrace(1/2 |v|^2, C + D) = 1/2 (||v||^2 - |v|^2) + 1/4 ||w||^2
