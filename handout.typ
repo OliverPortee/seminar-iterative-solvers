@@ -8,6 +8,14 @@
 
 #title[Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
 
+= Setup
+
+Poisson equation with Dirichlet boundary conditions
+$
+-laplace u = f &wide& &"in" Omega \
+u = 0 &wide& &"on" partial Omega
+$
+
 = Grids
 
 #figure(
@@ -51,7 +59,32 @@ $
 S_h &= S_H plus.o T_h wide u &= v plus w
 $
 
-#hi[TODO: introduce the norm and the seminorm]
+= Norms
+
+We define
+$
+||v|| := sqrt(a(v, v)).
+$
+
+Therefore,
+$
+||v||^2 = a(v, v) &= integral_Omega v_xi^2 + v_eta^2 \
+&= sum_nu integral_nu v_xi^2 + v_eta^2 \
+&= sum_nu (lr(v_xi^2|)_nu + lr(v_eta^2|)_nu) underbrace(1/2 h^2, op("area")(nu)) \
+&= sum_nu ((v_"east" - v_"west")^2 / h^2 + (v_"north" - v_"south")^2 / h^2) 1/2 h^2 \
+&= sum_nu 1/2 (v_"east" - v_"west")^2 + sum_nu 1/2 (v_"north" - v_"south")^2 \
+&= sum_vec(i\, j in Omega_h, d(i, j) = h, delim: #none) (v_i - v_j)^2.
+$
+The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2).
+
+Similarly, we define a seminorm (i.e., something that looks like a norm but that could evaluate to zero, $|x| = 0$, even though $x != 0$),
+
+$
+|v|^2 := sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2.
+$
+
+Note that in the seminorm, we only include green and red points in the sum.
+
 
 = Lemma 3.1
 
@@ -64,7 +97,7 @@ integral_"I" v_xi w_xi = integral_(I_"links") v_xi w_xi + integral_(I_"rechts") 
 $
 da $lr(w_xi|)_(I_"links") = - lr(w_xi|)_(I_"rechts")$ und $v_xi = "const"$.
 
-#hi[TODO: Couldn't we directly evaluate $integral_("I" + "II") v_xi w_xi + v_eta w_eta$?]
+#hi[TODO: Couldn't we directly evaluate $integral_("I" + "II") v_xi w_xi + v_eta w_eta$? Or, even better, $a(v, w) = integral_Omega v_xi w_xi + v_eta w_eta = ... = A_Omega + B_Omega - C_Omega - D_Omega$ und dann $C_Omega = sum_nu C_nu$]
 
 $
 integral_"I" v_xi w_xi + v_eta w_eta &= integral_"I" v_eta w_eta \
@@ -321,3 +354,5 @@ Finally, we express this as
 $
 (|u|) / (||u||) <= lambda / sqrt(1/2 (1 + lambda^2)) = sqrt(lambda^2 / (1/2 (1 + lambda^2))) = sqrt((2 lambda^2) / (1 + lambda^2)) =: sqrt(rho)
 $
+
+= Gauß-Seidel Relaxation
