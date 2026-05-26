@@ -70,6 +70,42 @@ integral_I v_xi w_xi + v_eta w_eta &= integral_I v_eta w_eta \
 &= A_I + B_I - C_I - D_I
 $
 
+#highlight[TODO]
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: line, content, scale, circle
+
+		scale(2)
+
+		let p1 = (0, -1)
+		let p2 = (1, 0)
+		let p3 = (0, 1)
+		let p4 = (-1, 0)
+		let p5 = (0, 0)
+		
+		line((p4.at(0) - 0.5, 0), (p2.at(0) + 0.5, 0), mark: (end: ">"), name: "xi-axis")
+		line((0, p1.at(1) - 0.3), (0, p3.at(1) + 0.4), mark: (end: ">"), name: "eta-axis")
+		content("xi-axis.end", $xi$, anchor: "north-west", padding: 0.1)
+		content("eta-axis.end", $eta$, anchor: "south-east", padding: 0.1)
+
+		line(p1, p2, p3, p4, close: true)
+
+		let r = 2pt
+		circle(p1, radius: r, stroke: none, fill: red)
+		circle(p2, radius: r, stroke: none, fill: olive)
+		circle(p3, radius: r, stroke: none, fill: red)
+		circle(p4, radius: r, stroke: none, fill: olive)
+		circle(p5, radius: r, stroke: none, fill: black)
+
+		content(p1, $1$, anchor: "east", padding: 0.25)
+		content(p3, $3$, anchor: "east", padding: 0.25)
+		content(p2, $2$, anchor: "north", padding: 0.25)
+		content(p4, $4$, anchor: "north", padding: 0.25)
+		content(p5, $5$, anchor: "north-east", padding: 0.2)
+	})
+)
+
 $
 a(v, w) <= underbrace(1/2 ||v||^2, A) + underbrace(1/4 ||w||^2, B) - underbrace(1/2 |v|^2, C + D) = 1/2 (||v||^2 - |v|^2) + 1/4 ||w||^2
 $
@@ -86,7 +122,54 @@ pdv(, t) (mu / (2 t) + 1/4 t) = -mu / (2 t^2) + 1/4 =^! 0 \
 t_* = sqrt(2 mu).
 $
 
-This is the value where the tangent $f(t) = C t$ touches the quadratic function $1/2 mu + 1/4 t^2$.
+This is the value where the tangent $f(t) = C t$ (yellow) touches the quadratic function $1/2 mu + 1/4 t^2$ (blue). The derivative is shown in red.
+
+#figure(
+	lq.diagram(
+		yaxis: (
+			position: 0,
+			lim: (-3, 5),
+			ticks: none,
+			tip: tiptoe.triangle,
+		),
+		xaxis: (
+			position: 0,
+			ticks: none,
+			extra-ticks: (lq.tick(1, label: $t_*$, inset: 2pt, outset: 2pt),),
+			tip: tiptoe.triangle,
+			label: lq.label($t$, dx: 85pt, dy: -16pt),
+
+		),
+		lq.plot(
+			lq.linspace(-5, 5),
+			x => 1 + x * x,
+			mark: none,
+		),
+		lq.plot(
+			lq.linspace(-5, 0, include-end: false),
+			x => 1/x + x,
+			mark: none,
+			stroke: lq.color.map.petroff10.at(2)
+		),
+		lq.plot(
+			lq.linspace(0.1, 5),
+			x => 1/x + x,
+			mark: none,
+			stroke: lq.color.map.petroff10.at(2)
+		),
+		lq.plot(
+			lq.linspace(-5, 5),
+			x => 2 * x,
+			mark: none,
+			stroke: lq.color.map.petroff10.at(1)
+		),
+		lq.line(
+			(1, 0),
+			(1, 2),
+			stroke: (dash: "dashed", paint: gray),
+		),
+	)
+)
 
 
 Accordingly,
