@@ -1,11 +1,12 @@
 #import "@preview/cetz:0.5.0"
+#import "@preview/physica:0.9.8": *
 
 #import calc: even, odd
 
 #let W = 6
 #let H = 4
 
-#let dot(x, y) = {
+#let grid-point(x, y) = {
 	let fill = if even(x) and even(y) {
 		olive
 	} else if odd(x) and odd(y) {
@@ -36,10 +37,10 @@
 		for y in range(H + 1) {
 			if even(x + y) {
 				if not hide-green-red {
-					dot(x, y)
+					grid-point(x, y)
 				}
 			} else {
-				dot(x, y)
+				grid-point(x, y)
 			}
 		}
 	}
@@ -64,7 +65,7 @@
 	for x in range(W + 1) {
 		for y in range(H + 1) {
 			if even(x + y) {
-				dot(x, y)
+				grid-point(x, y)
 			}
 		}
 	}
@@ -89,7 +90,7 @@
 	}
 	for x in range(0, W + 1, step: 2) {
 		for y in range(0, H + 1, step: 2) {
-			dot(x, y)
+			grid-point(x, y)
 		}
 	}
 }

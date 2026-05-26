@@ -1,0 +1,17 @@
+# Multigrid script
+
+seite 51
+- Ziel: in Assumption B das gamma herausfinden
+- Theorem 2 + 3
+- Assumption A: rho_sm = 0 bei Braess, weil die Träger von den schwarzen Punkten disjunkt sind
+- Lemma 3 Seite 88
+	- gamma_V W verstärkte Cauchy Schwarz Ungleichung
+	- orthogonal: K = 1
+	- cos Winkel zwischen V und W = 1 - 1/K
+- rote Punkte: v = lambda_N v_N + lambda_S v_S + lambda_E v_E + lambda_W v_W
+- schwarze Punkte: w = lambda v_mitte
+- Seite 61: Localization: Integral nicht über ganzes Gitter sondern über nur über ein Teilgebiet
+
+1. localization gamma
+2. zweigitter, mehrgitter
+3. Ergebnisse (was passiert, wenn man das gamma einsetzt)
