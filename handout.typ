@@ -75,7 +75,7 @@ $
 &= sum_nu 1/2 (v_"east" - v_"west")^2 + sum_nu 1/2 (v_"north" - v_"south")^2 \
 &= sum_vec(i\, j in Omega_h, d(i, j) = h, delim: #none) (v_i - v_j)^2.
 $
-The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2).
+The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2). Note that each pair $(i, j)$ is only used once, meaning that if we include pair $(i, j)$ in the sum ($i != j$), we do not include $(j, i)$ as well.
 
 Similarly, we define a seminorm (i.e., something that looks like a norm but that could evaluate to zero, $|x| = 0$, even though $x != 0$),
 
@@ -356,3 +356,97 @@ $
 $
 
 = Gauß-Seidel Relaxation
+
+We use a finite element discretization. Interestingly, the stencil for the black points is the same as the stencil for the green/red points:
+
+$
+mat(0, -1, 0; -1, 4, -1; 0, -1, 0)
+$
+
+even though the neighborhood of elements looks different between black and green/red points:
+
+#figure(
+cetz.canvas({
+	import cetz.draw: line, circle, translate, content, floating
+
+	let p0 = ( 0,  0)
+	let p1 = (-1, -1)
+	let p2 = ( 0, -1)
+	let p3 = ( 1, -1)
+	let p4 = ( 1,  0)
+	let p5 = ( 1,  1)
+	let p6 = ( 0,  1)
+	let p7 = (-1,  1)
+	let p8 = (-1,  0)
+
+	let d(coords, color) = circle(coords, fill: color, stroke: none, radius: 2pt)
+	let coordinate-system() = {
+		line((-1.7, 0), (1.7, 0), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "xi")
+		floating(content("xi.end", $xi$, anchor: "north-west", padding: 0.05))
+		line((0, -1.7), (0, 1.7), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "eta")
+		floating(content("eta.end", $eta$, anchor: "east", padding: 0.11))
+	}
+	let point-labels() = {
+		content(p2, $1$, anchor: "north-west", padding: 0.05)
+		content(p4, $2$, anchor: "north-west", padding: 0.05)
+		content(p6, $3$, anchor: "south-east", padding: 0.05)
+		content(p8, $4$, anchor: "south-east", padding: 0.05)
+	}
+	
+
+	coordinate-system()
+	line(p1, p3, p5, p7, close: true)
+	line(p4, p8)
+	line(p2, p6)
+	line(p2, p4, p6, p8, close: true)
+	d(p1, black)
+	d(p2, olive)
+	d(p3, black)
+	d(p4, red)
+	d(p5, black)
+	d(p6, olive)
+	d(p7, black)
+	d(p8, red)
+	d(p0, black)
+	point-labels()
+	content(p0, $0$, anchor: "north-west", padding: 0.05)
+	
+	translate(x: 6)
+	
+	coordinate-system()
+	line(p1, p3, p5, p7, close: true)
+	line(p3, p7)
+	line(p1, p5)
+	line(p4, p8)
+	line(p2, p6)
+	d(p1, olive)
+	d(p2, black)
+	d(p3, olive)
+	d(p4, black)
+	d(p5, olive)
+	d(p6, black)
+	d(p7, olive)
+	d(p8, black)
+	d(p0, red)
+	point-labels()
+	content((0.27, 0.37), $0$, anchor: "north-west", padding: 0.05)
+})
+)
+
+The stencil results in the following Gauss-Seidel relaxation for a single row:
+
+$
+u_i = 1/4 sum_(j = 1)^4 u_j + b_i
+$
+where $b_i = integral_Omega f phi_i$ is the right-hand side. In the following section, we will be concerned with the error of our approximation for $u$. Therefore, we assume that $b = 0$.
+
+We split the Gauss-Seidel relaxation into two steps ($eq.est$ red-black Gauss-Seidel). First, we will smooth the black points, then the green/red points. Formally,
+$
+(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H &wide& ("green/red"), 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H &wide& ("black")) \
+(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& ("green/red"), u_i &wide& p_i in Omega_h \\ Omega_H &wide& ("black"))
+$
+
+Here, $N(i)$ is the set containing the indices of the four relevant neighbors of $p_i$.
+
+*Lemma 4.1*
+
