@@ -5,6 +5,7 @@
 #set par(justify: true)
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
+#let infobox(content) = box(width: 100%, inset: 0.8em, stroke: blue, content)
 
 #title[Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
 
@@ -476,23 +477,158 @@ First iteration on level $q$ with $r = 2$ smoothings:
 + $u^(q, 7) <- G_q^"I" u^(q, 6)$
 + start the next iteration using $u^(q, 0) <- u^(q, 6)$ (even though we just computed $u^(q, 7)$)
 
+#hi[
+probably wrong: 6. should probably start with $G_q^"II"$
+]
+
 Next iterations omit step 1. and directly start with $u^(q, 1) = G_q^"II" u^(1, 0)$.
+
+$
+u^0 -->^(G^"I") u^1 -->^(G^"II") u^2 -->^(G^"I") u^3 -->^"coarse grid" u^4 -->^(G^"I") u^5 -->^(G^"II") u^6 -->^(G^"I") u^7
+$
 
 #line(length: 100%)
 
 First iteration on level $q$ with $r = 3$ smoothings:
 
 + $u^(q, 0) <- G_q^"II" u^(q, 0)$ (special case because this is the first iteration)
-+ $u$
++ $u^(q, 1) <- G_q^"I" u^(q, 0)$
++ $u^(q, 2) <- G_q^"II" u^(q, 1)$
++ $u^(q, 3) <- G_q^"I" u^(q, 2)$
++ coarse grid correction
++ $u^(q, 4) <- u^(q, 3) + v_1$
++ $u^(q, 6) <- G_q^"I" u^(q, 5)$ (mistake in the indices)
++ $u^(q, 7) <- G_q^"II" u^(q, 6)$
++ $u^(q, 8) <- G_q^"I" u^(q, 7)$
++ $u^(q, 9) <- G_q^"II" u^(q, 8)$
++ start the next iteration using $u^(q, 0) <- u^(q, 8)$
+
+$
+u^0 -->^(G^"II") u^1 -->^(G^"I") u^2 -->^(G^"II") u^3 -->^(G^"I") u^4 -->^"coarse grid" u^5 -->^(G^"I") u^6 -->^(G^"II") u^7 -->^(G^"I") u^8 -->^(G^"II") u^9
+$
+
+#line(length: 100%)
 
 = Actual Proof
 
-// #v(3cm)
-// #set math.equation(numbering: none)
+If we look at the sequence of Gauss-Seidel relaxations as an alternate method where $Q_V = G_q^"I"$ and $Q_W = G_q^"II"$,
 
-// 4. _Post-smoothing._ For $nu = 1,2,...,r+1$, determine
-// 	$
-// 		u^(q, k, r + nu markhl(+ 1, color: #green)) = G_q^nu u^(q, k, r + nu markhl(+ 0, color: #green)),
-// 	$
-// 	and proceed with $u^(q, k + 1, 0) = u^(q, k, 2 r + 2)$.
+#hi[why can we do that? How is $G_q^"I" = "id" - P_V$?]
 
+then we notice that the last half-step is the least effective (since the norm reduction decreases from step to step):
+
+$
+(||u^(nu + 1)||) / (||u^(nu + 1/2)||) >= (||u^(nu + 1/2)||) / (||u^nu||).
+$
+This is independent of whether the last half-step is an application of $G_q^"I"$ or $G_q^"II"$ (since we can swap $Q_V$ and $Q_W$).
+
+
+We also found that
+$
+(||G_q^"II" u^r||) / (||u^r||) <= (|u^r|) / (||u^r||) <= sqrt(rho).
+$
+This must be true even for the last application of $G_q^"II"$ in the sequence. All previous half-steps must have a norm reduction of $sqrt(q)$ or better (_better_ in this case means _smaller_ than $sqrt(q)$). Therefore,
+$
+(||u^r||) / (||u^0||) <= (sqrt(q))^r = q^(r/2)
+$
+
+If $u' = u^r - u^(q - 1)$ then
+
+#hi[Shouldn't it be $u' = u^r + u^(q - 1)$?]
+
+#hi[proof]
+
+$
+||u'|| &<= sqrt(1/2 (1 - lambda^2)) dot ||u^r|| \
+&<= rho^(r/2) sqrt((1 - lambda^2) / 2) dot ||u^0|| \
+&= rho^(r/2) sqrt(((1 - lambda^2) / (lambda^2 + 1)) / (2 / (lambda^2 + 1))) dot ||u^0||
+= rho^(r/2) sqrt(((lambda^2 + 1 - 2 lambda^2) / (lambda^2 + 1)) / ((2 lambda^2 + 2 - 2 lambda^2) / (lambda^2 + 1))) dot ||u^0||
+= rho^(r/2) sqrt((1 - (2 lambda^2) / (lambda^2 + 1)) / (2 - (2 lambda^2) / (lambda^2 + 1))) dot ||u^0|| \
+&= rho^(r/2) sqrt((1 - rho) / (2 - rho)) dot ||u^0||
+$
+
+#infobox[
+	#set math.equation(numbering: none)
+	as a reminder:
+	$
+	rho := (2 lambda^2) / (lambda^2 + 1) wide lambda := (|v|) / (||v||)
+	$
+]
+
+#line(length: 100%)
+
+Now we look at the deviation of $v_1$ from $u^(q - 1)$. We find that
+$
+u^(r + 1) - u' = (u^r + v_1) - (u^r - u^(q - 1)) = v_1 + u^(q - 1).
+$
+
+In step 3 of the Multigrid algorithm, we require that
+$
+||u^(r + 1) - u'|| = ||v_1 + u^(q - 1)|| <^! delta ||u^(q - 1)||.
+$ <eq:delta-estimation>
+We define
+$
+v_2 := 1/delta thin (u^(r + 1) - u') = 1/delta thin (v_1 + u^(q - 1)).
+$
+
+From @eq:delta-estimation, we find that
+$
+||u^(r + 1) - u'|| = delta ||v_2|| < delta ||u^(q - 1)|| \
+==> ||v_2|| < ||u^(q - 1)||
+$ <eq:v2vsuqm1>
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: line, circle, scale, content, arc
+
+		scale(2.2)
+		line((-2, 0), (2, 0), mark: (end: ">"))
+		line((0, -2), (0, 2), mark: (end: ">"))
+		content((-2, 2), anchor: "north-west", text(size: 18pt, $S_q$))
+		let l = 1.2
+		line((-l, -l), (l, l), stroke: 2pt)
+		let o = 0.3
+		line((l, l), (l + o, l + o), stroke: (dash: "dashed", thickness: 2pt))
+		line((-l, -l), (-l - o, -l - o), stroke: (dash: "dashed", thickness: 2pt))
+		content((l + o, l + o), anchor: "south-west", text(size: 18pt, $S_(q-1)$))
+		
+		let a = 1
+		arc((a, a), start: -45deg, stop: -135deg, anchor: "origin", radius: 0.2)
+		circle((a, a - 0.11), stroke: none, fill: black, radius: 0.5pt)
+		line((0, 0), (a, a), mark: (end: ">"), stroke: (thickness: 2pt, paint: red), fill: red)
+		let o = -0.5
+		line((a, a), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: olive), fill: olive)
+		line((0, 0), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: blue), fill: blue)
+
+		content((a/2, a/2), $u^(q - 1)$, anchor: "south-east")
+		content((a - o/2, a + o/2), $u'$, anchor: "south-west", padding: 0.1)
+		content(((a - o) / 2, (a + o) / 2), $u^r$, anchor: "south-east")
+
+	})
+)
+
+If $P$ is the projection onto $S_(q - 1)$, then
+$
+u^(q - 1) = P(u^r) wide "and" wide u' = (I - P)(u^r)
+$
+where $I$ is the identity operator. This is because
+
+$
+u^r &= u^(q - 1) + u' \
+&= P (u^r) + (u^r - u^(q - 1)) \
+&= P(u^r) + I(u^r) - P(u^r) \
+&= P(u^r) + (I - P)(u^r)
+$
+
+#hi[
+Why is $u^(q - 1) = P(u^r)$?
+]
+
+Since $v_2 in S_(q - 1)$, we find that $v_2 perp u'$, and therefore we can apply the Pythagorean theorem
+$
+||u' + v_2||^2 = ||u'||^2 + ||v_2||^2.
+$
+Because of @eq:v2vsuqm1, we have
+$
+||u' + v_2||^2 = ||u'||^2 + ||v_2||^2 <= ||u'||^2 + ||u^(q - 1)||^2 = ||u^r||^2.
+$
