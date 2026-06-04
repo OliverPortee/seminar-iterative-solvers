@@ -183,7 +183,7 @@ D_"I" + D_"II" &= 1/2 integral_"I" (v_eta - w_eta)^2 + 1/2 integral_"II" (v_eta 
 &= 1/2 (v_1 - (v_5 - w_5))^2 + 1/2 (v_3 - (v_5 - w_5))^2
 $
 
-Since we do not know anything aobut $v_5 - w_5$, we resolve to bounding $D_"I" + D_"II"$ by a lower limit (note that $D$ contributes negatively to the total sum $A + B - C - D$). This can be done by substituting $z := v_5 - w_5$,
+Since we do not know anything about $v_5 - w_5$, we resolve to bounding $D_"I" + D_"II"$ by a lower limit (note that $D$ contributes negatively to the total sum $A + B - C - D$). This can be done by substituting $z := v_5 - w_5$,
 $
 D_"I" + D_"II" = 1/2 (v_1 - z)^2 + 1/2 (v_3 - z)^2 =: phi(z).
 $
@@ -449,4 +449,50 @@ $
 Here, $N(i)$ is the set containing the indices of the four relevant neighbors of $p_i$.
 
 *Lemma 4.1*
+
+We want to show: if $u = G_h^"I" u$ then
+$
+ ||G_h^"II" u|| <= |u|.
+$
+
+
+Let $macron(u) = G^"II" u$.
+
+= Alternate Method
+
+= Multigrid Algorithm
+
+First iteration on level $q$ with $r = 2$ smoothings:
+
++ $u^(q, 0) <- G_q^"I" u^(q, 0)$ (special case because this is the first iteration)
++ $u^(q, 1) <- G_q^"II" u^(q, 0)$
++ $u^(q, 2) <- G_q^"I" u^(q, 1)$ (transition step)
++ approximate $v_1$ as the error $e in S_(q - 1)$ of the variational problem $J(u^(q, 2) + e) -> min$
+	- on the coarsest level $q = 1$, compute $v_1$ exactly
+	- otherwise, use a multigrid iteration on level $q - 1$, starting with $u^(q - 1, 0) = 0$
++ $u^(q, 3) <- u^(q, 2) + v_1$ (correction)
++ $u^(q, 5) <- G_q^"I" u^(q, 4)$ (mistake in the indices)
++ $u^(q, 6) <- G_q^"II" u^(q, 5)$
++ $u^(q, 7) <- G_q^"I" u^(q, 6)$
++ start the next iteration using $u^(q, 0) <- u^(q, 6)$ (even though we just computed $u^(q, 7)$)
+
+Next iterations omit step 1. and directly start with $u^(q, 1) = G_q^"II" u^(1, 0)$.
+
+#line(length: 100%)
+
+First iteration on level $q$ with $r = 3$ smoothings:
+
++ $u^(q, 0) <- G_q^"II" u^(q, 0)$ (special case because this is the first iteration)
++ $u$
+
+= Actual Proof
+
+// #v(3cm)
+// #set math.equation(numbering: none)
+
+// 4. _Post-smoothing._ For $nu = 1,2,...,r+1$, determine
+// 	$
+// 		u^(q, k, r + nu markhl(+ 1, color: #green)) = G_q^nu u^(q, k, r + nu markhl(+ 0, color: #green)),
+// 	$
+// 	and proceed with $u^(q, k + 1, 0) = u^(q, k, 2 r + 2)$.
 
