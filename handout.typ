@@ -3,6 +3,7 @@
 #set heading(numbering: "1.")
 #set math.equation(numbering: "(1)")
 #set par(justify: true)
+#set page(numbering: "1")
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
 #let infobox(content) = box(width: 100%, inset: 0.8em, stroke: blue, content)
@@ -639,7 +640,7 @@ $
 This must be true even for the last application of $G_q^"II"$ in the sequence. All previous half-steps must have a norm reduction of $sqrt(q)$ or better (_better_ in this case means _smaller_ than $sqrt(q)$). Therefore,
 $
 (||u^r||) / (||u^0||) <= (sqrt(q))^r = q^(r/2)
-$
+$ <eq:6-2>
 
 If $u' = u^r - u^(q - 1)$ then
 
@@ -654,7 +655,7 @@ $
 = rho^(r/2) sqrt(((lambda^2 + 1 - 2 lambda^2) / (lambda^2 + 1)) / ((2 lambda^2 + 2 - 2 lambda^2) / (lambda^2 + 1))) dot ||u^0||
 = rho^(r/2) sqrt((1 - (2 lambda^2) / (lambda^2 + 1)) / (2 - (2 lambda^2) / (lambda^2 + 1))) dot ||u^0|| \
 &= rho^(r/2) sqrt((1 - rho) / (2 - rho)) dot ||u^0||
-$
+$ <eq:6-3>
 
 #infobox[
 	#set math.equation(numbering: none)
@@ -675,6 +676,9 @@ In step 3 of the Multigrid algorithm, we require that
 $
 ||u^(r + 1) - u'|| = ||v_1 + u^(q - 1)|| <^! delta ||u^(q - 1)||.
 $ <eq:delta-estimation>
+
+#hi[define $delta$ first]
+
 We define
 $
 v_2 := 1/delta thin (u^(r + 1) - u') = 1/delta thin (v_1 + u^(q - 1)).
@@ -772,4 +776,106 @@ $
 &<= [1 - delta] ||Q tilde(G) hat(u)|| dot ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| dot ||u^r|| \
 &= [1 - delta] ||Q tilde(G) hat(u)|| dot ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| dot ||tilde(G) u^0|| \
 &<= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2)
+$ <eq:6-7>
+
+The last transformation step can be explained as follows. If
 $
+a &:= sqrt(1 - delta) ||Q tilde(G) hat(u)||, &wide& c := sqrt(1 - delta) ||Q tilde(G) u^0||, \
+b &:= sqrt(delta) ||tilde(G) hat(u)||, &wide& d := sqrt(delta) ||tilde(G) u^0||,
+$
+then
+$
+[1 - delta] ||Q tilde(G) hat(u)|| dot ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| dot ||tilde(G) u^0|| = a c + b d = vec(a, b) dot vec(c, d) \
+<= lr(||vec(a, b)||) dot lr(||vec(c, d)||) = sqrt(a^2 + b^2) dot sqrt(c^2 + d^2) \
+= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2).
+$
+
+Let's focus on the term $(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2$.
+
+#infobox[
+as a reminder:
+#set math.equation(numbering: none)
+$
+||u^r|| &<= rho^(r / 2) ||u^0|| &wide& #ref(<eq:6-2>) \
+||u'|| &<= rho^(r / 2) sqrt((1 - rho) / (2 - rho)) dot ||u^0|| &wide& #ref(<eq:6-3>)
+$
+]
+From @eq:6-2 and @eq:6-3, we find that
+$
+(1 - delta) ||Q underbrace(tilde(G) u^0, u^r)||^2 + delta ||tilde(G) u^0||^2 &= (1 - delta) ||u'||^2 + delta ||u^r||^2 \
+&<= (1 - delta) (rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||)^2 + delta (rho^(r/2) ||u^0||)^2 \
+&= (1 - delta) rho^r (1 - rho) / (2 - rho) ||u^0||^2 + delta rho^r ||u^0||^2 \
+&= rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta) ||u^0||^2
+$ <eq:6-8>
+
+#infobox[
+as a reminder:
+$
+rho = (2 lambda^2) / (lambda^2 + 1) wide "and" wide lambda =  (|v^r|) / (||v^r||)
+$
+]
+
+Note that the starting vector $u^0$ in @eq:6-2, @eq:6-3 and @eq:6-8 can be set arbitrarily. However, starting from a different $u^0$, the resulting $u^r = tilde(G) u^0$ will be different as well, which leads to a different $rho$. Therefore, when we write @eq:6-8 for an arbitrary $u in S_q$ as a starting vector, we need to account for all possible values of $rho$.
+
+#figure({
+	let xs = lq.linspace(0, 4, num: 200)
+	lq.diagram(
+		xaxis: (
+			label: $lambda$,
+		),
+		yaxis: (
+			label: $rho$,
+		),
+		lq.plot(
+			xs,
+			x => 2 * x * x / (x * x + 1),
+			mark: none,
+		)
+	)
+})
+
+Since $|v^r| <= ||v^r||$, we know that $0 <= lambda <= 1$. In this interval, $0 <= rho <= 1$. To preserve the inequality in @eq:6-8 for an arbitrary starting vector $u in S_q$, we need to include the upper bound of the term $rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)$ on this interval. Hence, we get
+$
+(1 - delta) ||Q tilde(G) u||^2 + delta ||tilde(G) u||^2 &<= underbrace(max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)], =: delta_q) ||u||^2 \
+&= delta_q ||u||^2
+$
+
+Therefore, we can extend equation @eq:6-7 as follows:
+
+$
+(hat(u), u^(2 r + 2)) &<= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2) \
+&<= sqrt(delta_q ||hat(u)||^2) dot sqrt(delta_q ||u^0||^2) \
+&= delta_q dot ||hat(u)|| dot ||u^0|| wide forall hat(u) in S_q.
+$
+
+This inequality must be true for all $hat(u) in S_q$. In order to find an estimate for $||u^(2 r + 2)||$, we use the following trick:
+
+$
+(hat(u), u^(2 r + 2)) &<= delta_q ||hat(u)|| ||u^0|| \
+=> ((hat(u), u^(2 r + 2))) / (||hat(u)||) &<= delta_q ||u^0|| \
+=> (hat(u) / (||hat(u)||), u^(2 r + 2)) &<= delta_q ||u^0||.
+$
+The term $hat(u) / (||hat(u)||)$ is a normalized vector with length 1. Therefore, this inner product reaches its maximum, when $hat(u) = u^(2 r + 2)$. Since the inequality must hold for all $hat(u)$, it must hold for $hat(u) = u^(2 r + 2)$ as well:
+$
+max_(hat(u)) (hat(u) / (||hat(u)||), u^(2 r + 2)) &= (u^(2 r + 2) / (||u^(2 r + 2)||), u^(2 r + 2)) = ((u^(2 r + 2), u^(2 r + 2))) / (||u^(2 r + 2)||)  = (lr(||u^(2 r + 2)||)^2) / (||u^(2 r + 2)||) \
+&= ||u^(2 r + 2)|| <= delta_q ||u^0||.
+$
+
+Now we have an estimate of the error norm at the end of a Multigrid cycle compared to its norm at the beginning of the cycle.
+
+#line(length: 100%)
+
+= Two-Grid
+
+When we only have two different levels, we observe the following: On the coarser level, we solve for the error in step 3 of the Multigrid algorithm exactly. Therefore,
+$
+0 = ||v_1 - u^(q - 1)|| < delta ||u^(q - 1)|| wide ==> wide delta = 0.
+$
+
+In this case,
+$
+delta_q = max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)] = max_(0 <= rho <= 1) [rho^r (1 - rho) / (2 - rho)].
+$
+
+
+// TODO: plot rho_q (rho) for different r
