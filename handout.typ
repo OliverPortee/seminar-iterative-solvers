@@ -431,8 +431,9 @@ cetz.canvas({
 	d(p0, red)
 	point-labels()
 	content((0.27, 0.37), $0$, anchor: "north-west", padding: 0.05)
-})
-)
+}),
+caption: [Neighborhood of a black node (left) and of a red node (right).]
+) <fig:neighborhood>
 
 The stencil results in the following Gauss-Seidel relaxation for a single row:
 
@@ -463,9 +464,18 @@ Let $macron(u) = G^"II" u$.
 
 Proof that $G^"I" = I - P_V$ where $P_V$ is an orthogonal projection and $V = T_h$. The first Gauß-Seidel half-step is associated with the splitting $S_h = S_H plus.o T_h$ where $T_h = { w in S_h | w(p_i) = 0 "for" p_i in Omega_H}$. All functions in $u + T_h$ have the same values as $u$ at the white nodes (and possibly different values at the black nodes).
 
-#hi[assumption: $G^"I" u$ minimizes $J(v)$ over $u + T_h$]
+$w := G^"I" u$ minimizes $J(v)$ over $u + T_h$. This is because of the following reason:
 
-$w := G^"I" u$ minimized $J(v)$ over $u + T_h$. Therefore, going in any direction $t in T_h$ must increase the energy: $J(w + t) >= J(w) space forall t in T_h$. This can also be written as
+$
+J(v) = a(v, v) = ||v||^2 = sum_vec(i\,j, d(i, j) = h, delim: #none) (v_i - v_j)^2.
+$
+Now, if we look at the support of a single basis function of $T_h$ (see @fig:neighborhood left), we find that the relevant terms of the sum are
+$
+(v_1 - v_0)^2 + (v_2 - v_0)^2 + (v_3 - v_0)^2 + (v_4 - v_0)^2 = "function"(v_0),
+$
+and the minimum of this function is at $v_0 = 1/4 (v_1 + v_2 + v_3 + v_4)$, which is exactly what $G^"I"$ computes for $v_0$.
+
+Since $w$ minimizes $J(v)$ over $u + T_h$, going in any direction $t in T_h$ must increase the energy: $J(w + t) >= J(w) space forall t in T_h$. This can also be written as
 $
 dv(, epsilon) J(w + epsilon t)|_(epsilon = 0) =^! 0 wide forall t in T_h.
 $
