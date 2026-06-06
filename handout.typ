@@ -532,6 +532,8 @@ Q u = (I - P) u = I u - P u = u - t = w = G^"I" u.
 $
 Therefore, $Q = G^"I"$.
 
+#hi[formal falsch, weil $G^"I"$ auf Vektoren arbeitet und $Q$ auf Funktionen (?)]
+
 #line(length: 100%)
 
 Now we want to show that $Q = G^"I"$ is self-adjoint, i.e.,
@@ -865,7 +867,7 @@ Now we have an estimate of the error norm at the end of a Multigrid cycle compar
 
 #line(length: 100%)
 
-= Two-Grid
+= Convergence of the Two-Grid Method
 
 When we only have two different levels, we observe the following: On the coarser level, we solve for the error in step 3 of the Multigrid algorithm exactly. Therefore,
 $
@@ -874,8 +876,61 @@ $
 
 In this case,
 $
-delta_q = max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)] = max_(0 <= rho <= 1) [rho^r (1 - rho) / (2 - rho)].
+delta_"TG" := delta_q = max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)] = max_(0 <= rho <= 1) underbrace([rho^r (1 - rho) / (2 - rho)], delta_"TG" (rho)).
 $
 
+#let maxima = range(5).map(r => {
+	if r == 0 {
+		return (0, 0.5)
+	}
+	let a = (3 * r + 1) / (2 * r)
+	let b = a - calc.sqrt(a * a - 2)
+	let c = calc.pow(b, r) * (1 - b) / (2 - b)
+	return (b, c)
+})
 
-// TODO: plot rho_q (rho) for different r
+#figure(
+	lq.diagram(
+		..range(5).map(r => lq.plot(
+			lq.linspace(1e-8, 1),
+			x => calc.pow(x, r) * (1 - x) / (2 - x),
+			mark: none,
+			label: $r = #r$,
+		)),
+		lq.scatter(
+			maxima.map(m => m.at(0)),
+			maxima.map(m => m.at(1)),
+			color: black,
+		),
+		legend: (
+			position: (100% + 0.5em, 0%),
+		),
+		xaxis: (
+			label: $rho$,
+		),
+		yaxis: (
+			label: $delta_"TG" (rho)$
+		),
+	)
+)
+
+The maxima of $rho_"TG" (rho)$ can be found analytically by setting its derivative to zero. However, the resulting term for the maximum is rather complicated. Braess found a good upper bound:
+$
+rho_"TG" < 1/((r + 1) e).
+$
+
+= Convergence of the Multigrid Method
+
+#hi[
+Convergence rate on level $q - 1$ must be the same as on level $q$ when $q > 1$.
+]
+
+In case $delta = delta_("MG", mu)^mu$, we find
+$
+delta_("MG", mu) &= max_(0 <= rho <= 1) rho^r ((1 - delta_("MG", mu)^mu) (1 - rho) / (2 - rho) + delta_("MG", mu)^mu) \
+&= max_(0 <= rho <= 1) rho^r ((1 - rho) / (2 - rho) + delta_("MG", mu)^mu (1 - (1 - rho) / (2 - rho))) \
+&= max_(0 <= rho <= 1) rho^r ((1 - rho) / (2 - rho) + delta_("MG", mu)^mu / (2 - rho)) \
+&= max_(0 <= rho <= 1) rho^r ((1 + delta_("MG", mu)^mu - rho) / (2 - rho)) \
+$
+
+This equation can be solved numerically.
