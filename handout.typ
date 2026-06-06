@@ -461,6 +461,105 @@ Let $macron(u) = G^"II" u$.
 
 = Alternate Method
 
+Proof that $G^"I" = I - P_V$ where $P_V$ is an orthogonal projection and $V = T_h$. The first Gauß-Seidel half-step is associated with the splitting $S_h = S_H plus.o T_h$ where $T_h = { w in S_h | w(p_i) = 0 "for" p_i in Omega_H}$. All functions in $u + T_h$ have the same values as $u$ at the white nodes (and possibly different values at the black nodes).
+
+#hi[assumption: $G^"I" u$ minimizes $J(v)$ over $u + T_h$]
+
+$w := G^"I" u$ minimized $J(v)$ over $u + T_h$. Therefore, going in any direction $t in T_h$ must increase the energy: $J(w + t) >= J(w) space forall t in T_h$. This can also be written as
+$
+dv(, epsilon) J(w + epsilon t)|_(epsilon = 0) =^! 0 wide forall t in T_h.
+$
+Now we use the definition of $J(v)$ and $a(u, v)$ (we assume that the right-hand side $f = 0$).
+$
+dv(, epsilon) J(w + epsilon t)|_(epsilon = 0) &= dv(, epsilon) a(w + epsilon t, w + epsilon t)|_(epsilon = 0) \
+&= dv(, epsilon) integral_Omega (pdv((w + epsilon t), xi))^2 + (pdv((w + epsilon t), eta))^2|_(epsilon = 0) \
+&= dv(, epsilon) integral_Omega (w_xi + epsilon t_xi)^2 + (w_eta + epsilon t_eta)^2|_(epsilon = 0) \
+&= dv(, epsilon) integral_Omega (w_xi^2 + 2 epsilon w_xi t_xi + epsilon^2 t_xi^2) + (w_eta^2 + 2 epsilon w_eta t_eta + epsilon^2 t_eta^2)|_(epsilon = 0) \
+&= dv(, epsilon) [integral_Omega (w_xi^2 + w_eta^2) + 2 epsilon integral_Omega (w_xi t_xi + w_eta t_eta) + epsilon^2 integral_Omega (t_xi^2 + t_eta^2)]_(epsilon = 0) \
+&= dv(, epsilon) [a(w, w) + 2 epsilon a(w, t) + epsilon^2 a(t, t)]_(epsilon = 0) \
+&= [2 a(w, t) + 2 epsilon a(t, t)]_(epsilon = 0) \
+&= 2 a(w, t) \
+&= 2 thin (w, t) =^! 0 wide forall t in T_h
+$ <eq:minimizer-perpencular>
+This inner product being $0$ means that $w$ is perpendicular to $T_h$, or, $w in T_h^perp$.
+
+
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: line, circle, scale, content, arc
+
+		scale(2.2)
+		line((-2, 0), (2, 0), mark: (end: ">"))
+		line((0, -2), (0, 2), mark: (end: ">"))
+		content((-2, 2), anchor: "north-west", text(size: 18pt, $S_h$))
+		let l = 1.2
+		line((-l, -l), (l, l), stroke: 2pt)
+		let o = 0.3
+		line((l, l), (l + o, l + o), stroke: (dash: "dashed", thickness: 2pt))
+		line((-l, -l), (-l - o, -l - o), stroke: (dash: "dashed", thickness: 2pt))
+		content((l + o, l + o), anchor: "south-west", text(size: 18pt, $T_h$))
+		
+		let a = 1
+		arc((a, a), start: -45deg, stop: -135deg, anchor: "origin", radius: 0.2)
+		circle((a, a - 0.11), stroke: none, fill: black, radius: 0.5pt)
+		line((0, 0), (a, a), mark: (end: ">"), stroke: (thickness: 2pt, paint: red), fill: red)
+		let o = -0.5
+		line((a, a), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: olive), fill: olive)
+		line((0, 0), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: blue), fill: blue)
+
+		content((a/2 + 0.2, a/2 + 0.2), $t = P u$, anchor: "south-east", padding: 0.1)
+		content((a - o/2, a + o/2), $w = Q u = (I - P) u$, anchor: "south-west", padding: 0.1)
+		content(((a - o) / 2, (a + o) / 2), $u$, anchor: "south-east", padding: 0.1)
+
+	})
+)
+
+Since $G^"I"$ only changes the values at the black nodes, we can find a $t in T_h$ such that $u = w + t$. According to the orthogonal projection theorem, for a given vector $u$, vectors $w$ and $t$ are unique. Since $w in T_h^perp$ and $t in T_h$, we can view $t$ as the orthogonal projection of $u in S_h$ onto the subspace $T_h$. This is written as $P u = t$ where $P$ is the projection operator onto $T_h$. Similarly, we have $Q := I - P$ (where $I$ is the identity operator), such that
+$
+Q u = (I - P) u = I u - P u = u - t = w = G^"I" u.
+$
+Therefore, $Q = G^"I"$.
+
+#line(length: 100%)
+
+Now we want to show that $Q = G^"I"$ is self-adjoint, i.e.,
+$
+(Q u, v) = (u, Q v) wide forall u, v in S_h.
+$
+Let $u = u_1 + u_2$ where $u_1 in T_h$ and $u_2 in T_h^perp$. Similarly, $v = v_1 + v_2$ where $v_1 in T_h$ and $v_2 in T_h^perp$.
+$
+(P u, v) &= (P (u_1 + u_2), v) = (P u_1 + P u_2, v) = (u_1, v) = (u_1, v_1 + v_2) \
+&= (u_1, v_1) + underbrace((u_1, v_2), =0 "since" u_1 perp v_2) = (u_1, v_1)
+$
+$
+(u, P v) &= (u, P (v_1 + v_2)) = (u, P v_1 + P v_2) = (u, v_1) = (u_1 + u_2, v_1) \
+&= (u_1, v_1) + underbrace((u_2, v_1), = 0 "since" u_2 perp v_1) = (u_1, v_1)
+$
+
+Therefore, $(P u, v) = (u, P v)$. The same is true for $Q$:
+$
+(Q u, v) = ((I - P) u, v) = (u - P u, v) = (u, v) - (P u, v) = (u, v) - (u, P v) \
+= (u, v - P v) = (u, (I - P) v) = (u, Q v).
+$ <eq:self-adjoint>
+
+#line(length: 100%)
+
+The same can be shown for $G^"II"$, only that here the relevant subspace is $hat(T)_h := {w in S_h | w(p_i) = 0 "for" p_i in Omega_h \\ Omega_H}$. Note that both $G^"I"$ and $G^"II"$ are idempotent. This means that if we apply the same orthogonal projection twice, the result will be the same as when we only apply it once ($G^"I" G^"I" = G^"I"$, or, $G^"I" G^"I" u = G^"I" u$). Assuming that $G^"II" u = u$,
+$
+||G^"I" u||^2 = (G^"I" u, G^"I" u) = (u, G^"I" G^"I" u) = (u, G^"I" u) \
+= (G^"II" u, G^"I" u) = (u, G^"II" G^"I" u) <= ||u|| dot ||G^"II" G^"I" u||.
+$
+Hence,
+$
+(||G^"I" u||) / (||u||) <= (||G^"II" G^"I" u||) / (||G^"I" u||).
+$
+The same can be shown the other way around. Assuming $G^"I" u = u$,
+$
+(||G^"II" u||) / (||u||) <= (||G^"I" G^"II" u||) / (||G^"II" u||).
+$
+In other words, the norm reduction becomes less effective with each half-step. (Of course, the smaller $(||G^"I/II" u||) / (||u||)$ the better, since the solution to the homogeneous equation $laplace u = 0$ with a zero Dirichlet boundary condition is $u = 0$).
+
 = Multigrid Algorithm
 
 First iteration on level $q$ with $r = 2$ smoothings:
@@ -577,6 +676,8 @@ $
 ==> ||v_2|| < ||u^(q - 1)||
 $ <eq:v2vsuqm1>
 
+Since $u'$ minimizes $J(v)$ in $u^r + S_(q - 1)$, we can show (similarly to @eq:minimizer-perpencular) that $u' perp u^(q - 1)$. Furthermore, we can apply the operator notation again: $P u^r = u^(q - 1) in S_(q - 1)$ is the projection of $u^r$ onto the subspace $S_(q - 1)$, and $Q u^r = (I - P) u^r = u^r - P u^r = u' in S_(q - 1)^perp$.
+
 #figure(
 	cetz.canvas({
 		import cetz.draw: line, circle, scale, content, arc
@@ -600,29 +701,12 @@ $ <eq:v2vsuqm1>
 		line((a, a), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: olive), fill: olive)
 		line((0, 0), (a - o, a + o), mark: (end: ">"), stroke: (thickness: 2pt, paint: blue), fill: blue)
 
-		content((a/2, a/2), $u^(q - 1)$, anchor: "south-east")
-		content((a - o/2, a + o/2), $u'$, anchor: "south-west", padding: 0.1)
+		content((a/2 + 0.2, a/2 + 0.1), $u^(q - 1) = \ P u^r$, anchor: "south-east")
+		content((a - o/2, a + o/2), $u' = Q u^r$, anchor: "south-west", padding: 0.1)
 		content(((a - o) / 2, (a + o) / 2), $u^r$, anchor: "south-east")
 
 	})
 )
-
-If $P$ is the projection onto $S_(q - 1)$, then
-$
-u^(q - 1) = P(u^r) wide "and" wide u' = (I - P)(u^r)
-$
-where $I$ is the identity operator. This is because
-
-$
-u^r &= u^(q - 1) + u' \
-&= P (u^r) + (u^r - u^(q - 1)) \
-&= P(u^r) + I(u^r) - P(u^r) \
-&= P(u^r) + (I - P)(u^r)
-$
-
-#hi[
-Why is $u^(q - 1) = P(u^r)$?
-]
 
 Since $v_2 in S_(q - 1)$, we find that $v_2 perp u'$, and therefore we can apply the Pythagorean theorem
 $
@@ -631,4 +715,51 @@ $
 Because of @eq:v2vsuqm1, we have
 $
 ||u' + v_2||^2 = ||u'||^2 + ||v_2||^2 <= ||u'||^2 + ||u^(q - 1)||^2 = ||u^r||^2.
+$
+
+#line(length: 100%)
+
+In both the pre-smoothing and the post-smoothing, we have $r + 1$ alternating factors.
+#figure(
+	table(
+		columns: 3,
+		stroke: none,
+		[*pre-smoothing*], [*coarse grid correction*], [*post-smoothing*],
+		$underbrace(G^(r + 1) dot G^r dot ... dot G^2 dot G^1, =: tilde(G))$, $$, $underbrace(G^1 dot G^2 dot ... dot G^r dot G^(r + 1), = tilde(G)^*)$,
+	)
+)
+
+We define
+$
+G^k := cases(G^"I" &wide& k "odd", G^"II" &wide& k "even")
+$
+
+Therefore,
+$
+u^r = tilde(G) u^0 wide "and" wide u^(2r + 2) = tilde(G)^* u^(r + 1).
+$
+
+Interestingly, $tilde(G)^*$ happens to be the adjoint of $tilde(G)$. This is because of the following reason:
+$
+(tilde(G) u, v) = (G^(r + 1) G^r G^(r - 1) ... G^1 u, v) &= (G^r G^(r - 1) ... G^1 u, G^(r + 1) v) \
+&= (G^(r - 1) ... G^1 u, G^r G^(r + 1) v) \
+&= ... \
+&= (G^1 u, G^2 ... G^r G^(r + 1) v) \
+&= (u, G^1 ... G^r G^(r + 1) v) = (u, tilde(G)^* v).
+$
+Note that $G^k$ are self-adjoint, as shown in @eq:self-adjoint.
+
+For an arbitrary $hat(u) in S_q$, we find
+$
+(hat(u), u^(2 r + 2)) &= (hat(u), tilde(G)^* u^(r + 1)) \
+&= (tilde(G) hat(u), u^(r + 1)) \
+&= (tilde(G) hat(u), u' + delta v_2) \
+&= (tilde(G) hat(u), u' - delta u' + delta u' + delta v_2) \
+&= (tilde(G) hat(u), [1 - delta] u' + delta [u' + v_2]) \
+&= [1 - delta]lr((tilde(G) hat(u), underbrace(u', Q dot Q u^r)), size: #40%) + delta (tilde(G) hat(u), u' + v_2) \
+&= [1 - delta](Q tilde(G) hat(u), Q tilde(G) u^0) + delta (tilde(G) hat(u), u' + v_2) \
+&<= [1 - delta](Q tilde(G) hat(u), Q tilde(G) u^0) + delta ||tilde(G) hat(u)|| dot ||u' + v_2|| \
+&<= [1 - delta] ||Q tilde(G) hat(u)|| dot ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| dot ||u^r|| \
+&= [1 - delta] ||Q tilde(G) hat(u)|| dot ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| dot ||tilde(G) u^0|| \
+&<= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2)
 $
