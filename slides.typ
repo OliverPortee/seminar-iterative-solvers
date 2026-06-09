@@ -70,25 +70,6 @@ Oliver Portee
 = Multigrid-Algorithmus
 
 
-// #fl.diagram(
-// 	spacing: (1.5em, 2em),
-// 	fl.node((0, 0), $u^"start"$),
-// 	fl.edge($G_(r + 1)$, "-|>", bend: 40deg),
-// 	fl.node((1, 0), $u^1$),
-// 	fl.edge($G_r$, "-|>", bend: 40deg),
-// 	fl.node((2, 0), $...$),
-// 	fl.edge($G_1$, "-|>", bend: 40deg),
-// 	fl.node((3, 0), $u^r$),
-// 	fl.node((4, 0), [coarse grid \ correction]),
-// 	fl.node((5, 0), $u^(r + 1)$),
-// 	fl.edge($G_1$, "-|>", bend: 40deg),
-// 	fl.node((6, 0), $u^(r + 2)$),
-// 	fl.edge($G_2$, "-|>", bend: 40deg),
-// 	fl.node((7, 0), $...$),
-// 	fl.edge($G_(r + 1)$, "-|>", bend: 40deg),
-// 	fl.node((8, 0), $u^(2 r + 2)$),
-// )
-
 #let fine(content) = $markhl(content)$
 
 #figure(
@@ -130,15 +111,6 @@ $
 G^k := cases(#G1($G^"I"$) &wide& k "odd", #G2($G^"II"$) &wide& k "even")
 $
 
-== Was haben wir bereits gezeigt?
-
-$
-	|u| <= sqrt((2 lambda^2) / (1 + lambda^2)) ||u|| quad "wobei" quad lambda = (|v|) / (||v||)
-$
-
-$
-	||G_h^"II" u||^2 <= |u| quad "falls" quad u = G_h^"I" u
-$
 
 Wo wollen wir hin?
 
@@ -242,12 +214,12 @@ $
 
 $
 v := G_h^"I" u \
-J(v + epsilon w) >= J(u) wide forall w in T_h, epsilon in RR
+J(v + w) >= J(v) wide forall w in T_h
 $
 
 alternativ:
 $
-lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 0 wide forall w in T_h
+lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 0 wide forall w in T_h, epsilon in RR
 $
 
 == Gauß-Seidel-Halbschritte als Projektionen
@@ -315,4 +287,96 @@ $
 
 == Orthogonalprojektionen sind selbstadjungiert
 
-Sei $u = u_1 + u_2 in U$ und $v = v_1 + v_2 in V$
+Sei $x = x_1 + x_2$ und $y = y_1 + y_2$, wobei $x_1, y_1 in T_h$ und $x_2, y_2 in T_h^perp$.
+
+$
+(P x, y) = (P x_1 + cancel(P x_2), y) = (x_1, y) = (x_1, y_1 + y_2) \
+= (x_1, y_1) + cancel((x_1, y_2)) = (x_1, y_1) = (x_1, y_1) + cancel((x_2, y_1)) \
+= (x_1 + x_2, y_1) = (x, y_1) = (x, P y_1 + cancel(P y_2)) = (x, P y)
+$
+
+== Projektionen sind idempotent
+
+$
+P^2 x = P P x = P x wide ==> wide P^2 = P
+$
+
+== Gauß-Seidel-Halbschritte werden ineffektiver
+
+Falls $G_h^"II" u = u$, dann
+
+$
+||G_h^"I" u||^2 = (G_h^"I" u, G_h^"I" u) = (u, G_h^"I" G_h^"I" u) = (u, G_h^"I" u) \
+= (G_h^"II" u, G_h^"I" u) = (u, G_h^"II" G_h^"I" u) <= ||u|| dot ||G_h^"II" G_h^"I" u||.
+$
+
+$
+(||G_h^"I" u||) / (||u||) <= (||G_h^"II" G_h^"I" u||) / (||G_h^"I" u||)
+quad "analog:" quad
+(||G_h^"II" u||) / (||u||) <= (||G_h^"I" G_h^"II" u||) / (||G_h^"II" u||)
+$
+
+== Was haben wir bereits in Teil 1 gezeigt?
+
+
+$
+	||G_h^"II" u|| <= |u| quad "falls" quad u = G_h^"I" u
+$
+
+$
+	|u| <= sqrt((2 lambda^2) / (1 + lambda^2)) ||u|| quad "wobei" quad lambda = (|v|) / (||v||)
+$
+
+#pause
+
+$
+==> ||G_h^"II" u|| <= |u| <= sqrt((2 lambda^2) / (1 + lambda^2)) ||u|| \
+==> (||G_h^"II" u||) / (||u||) <= sqrt((2 lambda^2) / (1 + lambda^2)) =: sqrt(rho)
+$
+
+== Der letzte Halbschritt ist am ineffektivsten
+
+
+
+#figure(
+	{
+		show lq.selector(lq.legend): set grid(row-gutter: 1em)
+		let n = 10
+		let rhoval = 1.03
+		lq.diagram(
+			height: 84%,
+			width: 87%,
+			legend: (
+				inset: 13pt,
+			),
+			xaxis: (
+				label: [Iteration],
+				subticks: none,
+			),
+			yaxis: (
+				subticks: none,
+				ticks: none,
+				extra-ticks: (lq.tick(rhoval, label: $sqrt(rho)$),),
+			),
+			lq.scatter(
+				range(n),
+				range(n).map(x => 2 * calc.exp(-x)),
+				size: 23pt,
+				label: $||u^k||$,
+			),
+			lq.scatter(
+				range(n),
+				range(n).map(x => 1 - calc.exp(-x)),
+				size: 23pt,
+				label: $(||u^(k + 1)||) / (||u^k||)$,
+			),
+			lq.line((0%, rhoval), (100%, rhoval)),
+		)
+	}
+)
+
+== Bei $r$ Halbschritten
+
+$
+||u^r|| <= (sqrt(rho))^r ||u^0|| = rho^(r/2) ||u^0||
+$
