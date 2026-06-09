@@ -465,6 +465,8 @@ Let $macron(u) = G^"II" u$.
 
 Proof that $G^"I" = I - P_V$ where $P_V$ is an orthogonal projection and $V = T_h$. The first Gauß-Seidel half-step is associated with the splitting $S_h = S_H plus.o T_h$ where $T_h = { w in S_h | w(p_i) = 0 "for" p_i in Omega_H}$. All functions in $u + T_h$ have the same values as $u$ at the white nodes (and possibly different values at the black nodes).
 
+#hi[Don't call it $w$ since $w in T_h$ and $G^"I" u in T_h^perp$.]
+
 $w := G^"I" u$ minimizes $J(v)$ over $u + T_h$. This is because of the following reason:
 
 $
@@ -481,6 +483,9 @@ $
 dv(, epsilon) J(w + epsilon t)|_(epsilon = 0) =^! 0 wide forall t in T_h.
 $
 Now we use the definition of $J(v)$ and $a(u, v)$ (we assume that the right-hand side $f = 0$).
+
+#hi[no need to substitute the definition of $a$ since we know it is linear and symmetric]
+
 $
 dv(, epsilon) J(w + epsilon t)|_(epsilon = 0) &= dv(, epsilon) a(w + epsilon t, w + epsilon t)|_(epsilon = 0) \
 &= dv(, epsilon) integral_Omega (pdv((w + epsilon t), xi))^2 + (pdv((w + epsilon t), eta))^2|_(epsilon = 0) \
@@ -540,6 +545,9 @@ Now we want to show that $Q = G^"I"$ is self-adjoint, i.e.,
 $
 (Q u, v) = (u, Q v) wide forall u, v in S_h.
 $
+
+#hi[then be directly shown for $Q$ as a projection onto $T_h^perp$]
+
 Let $u = u_1 + u_2$ where $u_1 in T_h$ and $u_2 in T_h^perp$. Similarly, $v = v_1 + v_2$ where $v_1 in T_h$ and $v_2 in T_h^perp$.
 $
 (P u, v) &= (P (u_1 + u_2), v) = (P u_1 + P u_2, v) = (u_1, v) = (u_1, v_1 + v_2) \
