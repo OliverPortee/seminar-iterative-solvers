@@ -1,9 +1,13 @@
 
 #import "@preview/fletcher:0.5.8" as fl
 #import "@preview/touying:0.7.4": *
+#import "@preview/cetz:0.5.2"
+#import "@preview/physica:0.9.8": *
+#import "@preview/lilaq:0.6.0" as lq
+
+#import calc: even, odd
 #import themes.simple: *
 
-#import "lib.typ": *
 
 #show: simple-theme
 
@@ -20,57 +24,78 @@ Oliver Portee
 
 = Gauß-Seidel Relaxation
 
+#let fine-color = lq.color.map.petroff10.at(0)
+#let coarse-color = lq.color.map.petroff10.at(1)
+
 #let Gbox(content, color) = box(fill: color.transparentize(70%), inset: (top: 7pt, bottom: 4pt, left: 3pt, right: 2pt), radius: 5pt, stroke: color, baseline: 15%, content)
-#let G1(content) = Gbox(content, blue)
-#let G2(content) = Gbox(content, olive)
+#let G1(content) = Gbox(content, fine-color)
+#let G2(content) = Gbox(content, coarse-color)
 
-#figure(
-	cetz.canvas({
-		import cetz.draw: line, circle, scale
+#let draw-grid(show-th: false) = {
+	import cetz.draw: line, circle
 
-		let grid-point(x, y) = {
-			let fill = if even(x + y) {
-				olive
-			} else {
-				blue
-			}
-			cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
-		}
-		
-		scale(2)
+	let W = 6
+	let H = 4
 
-		for x in range(W + 1) {
-			line((x, 0), (x, H))
+	let grid-point(x, y) = {
+		let fill = if even(x + y) {
+			coarse-color
+		} else {
+			fine-color
 		}
-		for y in range(H + 1) {
-			line((0, y), (W, y))
-		}
-		for x in range(W) {
-			for y in range(H) {
+		cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
+	}
+
+	if show-th {
+		let color = navy
+		for x in range(1, W) {
+			for y in range(1, H) {
 				if odd(x + y) {
-					line((x + 1, y), (x, y + 1))
-				} else {
-					line((x, y), (x + 1, y + 1))
+					line((x, y), (x + 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: -45deg), stroke: none)
+					line((x, y), (x + 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 45deg), stroke: none)
+					line((x, y), (x - 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 135deg), stroke: none)
+					line((x, y), (x - 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: 225deg), stroke: none)
 				}
 			}
 		}
-		
-		for x in range(W + 1) {
-			for y in range(H + 1) {
-				grid-point(x, y)
+	}
+	
+	for x in range(W + 1) {
+		line((x, 0), (x, H))
+	}
+	for y in range(H + 1) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
 			}
 		}
+	}
+	
+	for x in range(W + 1) {
+		for y in range(H + 1) {
+			grid-point(x, y)
+		}
+	}
+}
+
+#figure(
+	cetz.canvas({
+		cetz.draw.scale(2)
+		draw-grid()
 	})
 )
 
 
-#G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die grünen Punkte
+#G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die gelben Punkte
 
 
 = Multigrid-Algorithmus
 
-
-#let fine(content) = $markhl(content)$
 
 #figure(
 	cetz.canvas({
@@ -112,7 +137,7 @@ G^k := cases(#G1($G^"I"$) &wide& k "odd", #G2($G^"II"$) &wide& k "even")
 $
 
 
-Wo wollen wir hin?
+==  Wo wollen wir hin?
 
 $
 	||u^(2 r + 2)|| <= delta_q ||u^0||
@@ -124,7 +149,7 @@ $
 + Konvergenzrate nach Grobgitterkorrektur
 + ...
 
-= Konvergenzrate beim Pre-Smoothing
+= Konvergenzrate beim Presmoothing
 
 
 == Aufspaltung des Funktionenraums
@@ -138,7 +163,21 @@ $S_H$ finite Elemente Raum mit einem Freiheitsgrad an jedem Grobgitterpunkt
 
 $T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}$
 
-#hi[Visualization of $T_h$]
+
+== Basisfunktionen von $T_h$
+
+#slide(repeat: 2, self => [
+	#figure(
+		cetz.canvas({
+			cetz.draw.scale(2)
+			draw-grid(show-th: self.subslide > 1)
+		})
+	)
+
+	$
+	T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}
+	$
+])
 
 == Gauß-Seidel-Halbschritte als Projektionen
 
@@ -150,7 +189,16 @@ $
 	cetz.canvas({
 		import cetz.draw: circle, line, content, scale, floating
 
-		let grid-point(coords) = circle(coords, radius: 2pt, stroke: none, fill: if even(coords.at(0) + coords.at(1)) { blue } else { olive } )
+		let grid-point(coords) = circle(
+			coords,
+			radius: 2pt,
+			stroke: none,
+			fill: if even(coords.at(0) + coords.at(1)) {
+				fine-color
+			} else {
+				coarse-color
+			}
+		)
 
 		let p0 = ( 0,  0)
 		let p1 = ( 0, -1)
@@ -357,6 +405,7 @@ $
 				subticks: none,
 				ticks: none,
 				extra-ticks: (lq.tick(rhoval, label: $sqrt(rho)$),),
+				lim: (-0.05, auto),
 			),
 			lq.scatter(
 				range(n),
@@ -366,7 +415,7 @@ $
 			),
 			lq.scatter(
 				range(n),
-				range(n).map(x => 1 - calc.exp(-x)),
+				range(n).map(x => 1 - 0.8 * calc.exp(-x)),
 				size: 23pt,
 				label: $(||u^(k + 1)||) / (||u^k||)$,
 			),
@@ -380,3 +429,155 @@ $
 $
 ||u^r|| <= (sqrt(rho))^r ||u^0|| = rho^(r/2) ||u^0||
 $
+
+$rho^(r / 2)$ ... Konvergenzrate des Presmoothers #emoji.checkmark.box
+
+
+= Konvergenzrate der Grobgitterkorrektur
+
+
+Angenommen, we kennen schon die Konvergenzrate $delta_(q - 1)$:
+$
+delta := cases(0 &wide& "gröbstes Level", (delta_(q - 1))^mu &wide& "feinere Level")
+$
+
+$
+mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
+$
+
+$
+||v_1 - u^(q - 1)|| < delta ||u^(q - 1)||
+$
+
+
+== Exakte Grobgitterkorrektur
+
+$
+u' = u^r - u^(q - 1)
+$
+
+Exakte Lösung:
+$
+u^(q - 1) := limits("argmin")_(u in S_H) space J(u^r - u)
+$
+
+Exakte Grobgitterkorrektur:
+$
+u' = u^r - u^(q - 1)
+$
+
+== Exakte Grobgitterkorrektur
+
+Aus Teil 1:
+
+$
+a(v, w) <= sqrt(1/2 (1 - lambda^2)) ||v|| ||w|| wide forall v in S_H, w in T_h
+$
+
+zu zeigen:
+
+$
+||u'|| <= sqrt(1/2 (1 - lambda^2)) ||u^r||
+$
+
+#let picture = cetz.canvas({
+		import cetz.draw: *
+
+		let right-angle(pos, start: 0deg) = {
+			arc(pos, anchor: "origin", start: start, stop: start + 90deg)
+			let r = 0.57
+			let dx = r * calc.cos(start + 45deg)
+			let dy = r * calc.sin(start + 45deg)
+			let label-pos = (pos.at(0) + dx, pos.at(1) + dy)
+			circle(label-pos, stroke: none, fill: black, radius: 1pt)
+		}
+		
+		scale(1.5)
+		line((0, 0), (-4, 5), mark: (end: ">"), stroke: 2pt)
+		content((-2, 2.5), $u^r$, anchor: "north-east", padding: 0.1)
+		line((0, 0), (0, 5), mark: (end: ">"), stroke: 2pt)
+		content((0, 2.5), $u'$, anchor: "west", padding: 0.2)
+		line((0, 0), (25/4, 5), mark: (end: ">"), stroke: 2pt)
+		content((25/8, 2.5), $w$, anchor: "north-west", padding: 0.1)
+		line((0, 5), (-4, 5), mark: (end: ">"), stroke: 2pt)
+		content((-2, 5), $u^(q - 1)$, anchor: "south", padding: 0.1)
+
+		line((-7, 0), (7, 0))
+		content((3.4, 0), $S_H$, anchor: "north", padding: 0.2)
+		line((-7, 5), (7, 5), stroke: (dash: "dashed"))
+
+		line((0.8, -1), (0, 0), stroke: (dash: "dashed"))
+
+		
+		right-angle((0, 0), start: 219deg)
+
+		line((-1, -0.8), (15/2, 6), stroke: (dash: "dashed"))
+		floating(content((15/2, 6), $T_h$, anchor: "south-east", padding: 0.1))
+
+		arc((0, 0), anchor: "origin", start: 90deg, stop: 128deg)
+		content((-0.21, 0.7), $alpha$)
+		arc((0, 0), anchor: "origin", start: 0deg, stop: 38deg)
+		content((0.7, 0.29), $alpha$)
+
+		right-angle((0, 5), start: 180deg)
+	})
+
+#align(center + horizon,
+	picture
+)
+$
+u' = u^r - u^(q - 1) = u^r - P_(S_H) u^r
+$
+
+
+== Exakte Grobgitterkorrektur
+
+#scale(68%, picture, reflow: true)
+
+#place(top + left, dx: 446pt, dy: 34pt, text(20pt)[
+	$
+		v in S_H, w in T_h \
+		cos(alpha) = a(v, w) / (||v|| ||w||) \
+		a(v, w) <= sqrt(1/2 (1 - lambda^2)) ||v|| ||w|| \
+		a(v, w) / (||v|| ||w||) = cos(alpha) <= sqrt(1/2 (1 - lambda^2)) \
+	$
+])
+
+$
+	||u'|| = ||u^r|| cos(alpha) <= sqrt(1/2 (1 - lambda^2)) ||u^r||
+$
+
+== Presmoothing + Exakte Grobgitterkorrektur
+
+$
+||u'|| <= sqrt(1/2 (1 - lambda^2)) ||u^r||  wide "und" wide ||u^r|| <= rho^(r / 2) ||u^0|| \
+$
+$
+==> ||u'|| &<= rho^(r / 2) sqrt(1/2 (1 - lambda^2)) ||u^0|| \
+&= rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||
+$
+with $rho := (2 lambda^2) / (lambda^2 + 1)$
+
+== Nicht-Exakte Grobgitterkorrektur
+
+#highlight[TODO]
+
+$
+||u^(r + 1) - u'|| = ||(u^r + v_1) - (u^r + u^(q - 1))|| = ||v_1 - u^(q - 1)|| \
+$
+laut Annahme:
+$
+||underbrace(v_1 - u^(q - 1), =: delta v_2)|| <= delta ||u^(q - 1)|| \
+$
+$
+v_1 - u^(q - 1) = u^(r + 1) - u' =: delta v_2 wide "mit" wide ||v_2|| <= ||u^(q - 1)||
+$
+
+#figure(
+	cetz.canvas({
+		
+	})
+)
+
+== Multgrid-Iteration
+
