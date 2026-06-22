@@ -317,6 +317,8 @@ $
 #pause
 - Orthogonalprojektionen sind selbstadjungiert
 
+#highlight[TODO: weniger Stichpunkte]
+
 == Adjungierte Operatoren
 
 Operator $Q^*$ ist der adjungierte Operator zu $Q$, wenn gilt
@@ -431,6 +433,8 @@ $
 $
 
 $rho^(r / 2)$ ... Konvergenzrate des Presmoothers #emoji.checkmark.box
+
+#highlight[TODO: Abbildung mit Smoothing-Steps]
 
 
 = Konvergenzrate der Grobgitterkorrektur
@@ -558,9 +562,33 @@ $
 $
 with $rho := (2 lambda^2) / (lambda^2 + 1)$
 
-== Nicht-Exakte Grobgitterkorrektur
+#highlight[TODO: Abbildung mit Smoothing-Steps und Grobgitterkorrektur]
 
-#highlight[TODO]
+== Exakte Grobgitterkorrektur ist Orthogonalprojektion
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: *
+
+		scale(1.5)
+		
+		line((-3, 0), (8, 0))
+
+		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
+
+		floating({
+			content((3, 3), $u^r$, anchor: "south-east")
+			content((3, 0), $u^(q - 1)$, anchor: "north", padding: 0.3)
+			content((0, 0), $0$, anchor: "north", padding: 0.2)
+			content((6, 3), $u' &= u^r - u^(q - 1) \ &= underbrace((I - P_(S_H)), =: Q) u^r$, anchor: "west", padding: 0.2)
+			content((8, 0), $S_H$, anchor: "west", padding: 0.2)
+		})
+	})
+)
+
+== Nicht-Exakte Grobgitterkorrektur
 
 $
 ||u^(r + 1) - u'|| = ||(u^r + v_1) - (u^r + u^(q - 1))|| = ||v_1 - u^(q - 1)|| \
@@ -573,11 +601,219 @@ $
 v_1 - u^(q - 1) = u^(r + 1) - u' =: delta v_2 wide "mit" wide ||v_2|| <= ||u^(q - 1)||
 $
 
+
+== Nicht-Exakte Grobgitterkorrektur
+
 #figure(
 	cetz.canvas({
+		import cetz.draw: *
+
+		scale(1.5)
 		
+		line((-3, 0), (8, 0))
+
+		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (1.5, 0), stroke: 3pt, mark: (end: ">"))
+
+		line((6, 6), (7.5, 6), stroke: (dash: "dashed"))
+		line((6, 0), (7.5, 6), stroke: 2pt, mark: (end: ">"))
+		line((1.5, 0), (7.5, 6), stroke: (dash: "dashed"))
+
+		floating({
+			content((3, 3), $u^r$, anchor: "south-east")
+			content((6, 0), $u^(q - 1)$, anchor: "north", padding: 0.3)
+			content((0, 0), $0$, anchor: "north", padding: 0.2)
+			content((6, 3), $u'$, anchor: "east", padding: 0.1)
+			content((6.75, 3), $u^(r + 1)$, anchor: "west", padding: 0.2)
+			content((8, 0), $S_H$, anchor: "west", padding: 0.2)
+			content((1.5, 0), $delta v_2$, anchor: "north", padding: 0.2)
+		})
 	})
 )
 
-== Multgrid-Iteration
+#highlight[TODO: $G$ einführen]
 
+== Fast Geschafft
+
+$
+(hat(u), u^(2 r + 2)) = (hat(u), tilde(G)^* u^(r + 1)) = (tilde(G) hat(u), u' + delta v_2) \
+= (tilde(G) hat(u), u' -delta u' + delta u' + delta v_2) = (tilde(G) hat(u), (1 - delta) u' + delta (u' + v_2)) \
+= (1 - delta) (tilde(G) hat(u), u') + delta (tilde(G) hat(u), u' + v_2) \
+<= (1 - delta) (tilde(G) hat(u), Q u^r) + delta ||tilde(G) hat(u)|| ||u' + v_2|| \
+<= (1 - delta) (tilde(G) hat(u), Q^2 u^r) + delta ||tilde(G) hat(u)|| ||u^r|| \
+<= (1 - delta) ||Q tilde(G) hat(u)|| ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| ||tilde(G) u^0||
+$
+
+$
+(hat(u), u^(2 r + 2)) &<= (1 - delta) ||Q tilde(G) hat(u)|| ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| ||tilde(G) u^0|| \
+&= a c + b d = vec(a, b) dot vec(c, d) \
+&<= lr(||vec(a, b)||) dot lr(||vec(c, d)||) = sqrt(a^2 + b^2) dot sqrt(c^2 + d^2) \
+&= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2)
+$
+
+$
+a &:= sqrt(1 - delta) ||Q tilde(G) hat(u)|| &wide c &:= sqrt(1 - delta) ||Q tilde(G) u^0|| \
+b &:= sqrt(delta) ||tilde(G) hat(u)|| &wide d &:= sqrt(delta) ||tilde(G) u^0||
+$
+
+$
+(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2 = (1 - delta) ||u'||^2 + delta ||u^r||^2 \
+<= (1 - delta) (rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||)^2 + delta (rho^(r/2) ||u^0||)^2 \
+= (1 - delta) rho^r (1 - rho) / (2 - rho) lr(||u^0||)^2 + delta rho^r lr(||u^0||)^2 \
+= rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta) lr(||u^0||)^2
+$
+
+Welche Werte kann $rho$ annehmen?
+
+
+== Welche Werte kann $rho$ annehmen?
+
+$
+rho := (2 lambda^2) / (lambda^2 + 1) wide wide lambda := (|v^r|) / (||v^r||)
+$
+$
+|v^r| <= ||v^r|| wide &==> wide 0 <= lambda <= 1
+$
+
+#place(center, dy: 20pt, {
+	let xs = lq.linspace(0, 1, num: 200)
+	lq.diagram(
+		width: 325pt,
+		height: 161pt,
+		xaxis: (
+			label: $lambda$,
+		),
+		yaxis: (
+			label: $rho$,
+		),
+		lq.plot(
+			xs,
+			x => 2 * x * x / (x * x + 1),
+			stroke: black + 4pt,
+			mark: none,
+		)
+	)
+})
+
+==
+Definiere
+$
+delta_q := max_(0 <= rho <= 1) rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)
+$
+
+$
+(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2 <= delta_q lr(||u^0||)^2
+$
+analog:
+$
+(1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2 <= delta_q ||hat(u)||^2
+$
+
+==
+
+$
+(hat(u), u^(2 r + 2)) <= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2) \
+<= sqrt(delta_q ||hat(u)||^2) dot sqrt(delta_q ||u^0||^2) = delta_q ||hat(u)|| ||u^0||
+$
+
+
+== Dualitätsargument
+$
+(hat(u), u^(2 r + 2)) <= delta_q ||hat(u)|| ||u^0|| wide forall hat(u) in S_h \
+((hat(u), u^(2 r + 2))) / (||hat(u)||) = (hat(u) / (||hat(u)||), u^(2 r + 2)) <= delta_q ||u^0|| \
+(hat(u) / (||hat(u)||), u^(2 r + 2)) <= underbrace(lr(||hat(u) / (||hat(u)||)||), = 1) dot ||u^(2 r + 2)|| \
+||u^(2 r + 2)|| <= delta_q ||u^0||
+$
+
+== Ergebnis
+
+$
+||u^(2 r + 2)|| <= delta_q ||u^0||
+$
+mit
+$
+delta_q := max_(0 <= rho <= 1) rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)
+$
+#pause
+$
+delta := cases(0 &wide& "gröbstes Level", (delta_(q - 1))^mu &wide& "feinere Level")
+$
+
+== Two-Grid-Konvergenz
+
+$
+delta = 0
+$
+
+$
+delta_q = max_(0 <= rho <= 1) rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta) \
+	=^(delta = 0) max_(0 <= rho <= 1) rho^r (1 - rho) / (2 - rho)
+$
+
+#let maxima = range(5).map(r => {
+	if r == 0 {
+		return (0, 0.5)
+	}
+	let a = (3 * r + 1) / (2 * r)
+	let b = a - calc.sqrt(a * a - 2)
+	let c = calc.pow(b, r) * (1 - b) / (2 - b)
+	return (b, c)
+})
+
+#align(center + horizon,
+	lq.diagram(
+		width: 100%,
+		height: 100%,
+		..range(5).map(r => lq.plot(
+			lq.linspace(1e-8, 1),
+			x => calc.pow(x, r) * (1 - x) / (2 - x),
+			mark: none,
+			label: $r = #r$,
+			stroke: 2pt,
+		)),
+		lq.scatter(
+			maxima.map(m => m.at(0)),
+			maxima.map(m => m.at(1)),
+			color: black,
+			size: 9pt,
+		),
+		legend: (
+			position: (100% + 0.5em, 0%),
+		),
+		xaxis: (
+			label: $rho$,
+		),
+		yaxis: (
+			label: $delta_"TG" (rho)$
+		),
+	)
+)
+
+== Multigrid-Konvergenz
+
+$
+delta = (delta_(q - 1))^mu \
+delta_q = max_(0 <= rho <= 1) rho^r ((1 - (delta_(q - 1))^mu) (1 - rho) / (2 - rho) + (delta_(q - 1))^mu)
+$
+Annahme: $delta_q = delta_(q - 1) = delta_"MG"$ \
+Löse die Gleichung
+$
+delta_"MG" = max_(0 <= rho <= 1) rho^r ((1 - (delta_"MG")^mu) (1 - rho) / (2 - rho) + (delta_"MG")^mu)
+$
+
+== Konvergenzraten
+
+#figure(
+	table(
+		columns: 5,
+		inset: 20pt,
+		stroke: none,
+		table.cell(align: right, $r ->$), table.vline(), $0$, $1$, $2$, $3$,
+		table.hline(),
+		[*Two Grid*], $0.5$, $0.172$, $0.114$, $0.086$,
+		[*MG $mu = 1$ (V-cycle)*], $$, $1/2$, $1/3$, $1/4$,
+		[*MG $mu = 2$ (W-cycle)*], $$, $0.187$, $0.120$, $0.087$
+	)
+)
