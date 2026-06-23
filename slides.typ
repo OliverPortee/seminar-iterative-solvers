@@ -16,6 +16,9 @@
 #title-slide[
 #v(1fr)
 = MG Konvergenzrate
+
+Über die Kunst, Probleme so lange zu projizieren, bis sie konvergieren
+
 Teil 2
 
 #v(1fr)
@@ -133,7 +136,7 @@ Oliver Portee
 
 
 $
-G^k := cases(#G1($G^"I"$) &wide& k "odd", #G2($G^"II"$) &wide& k "even")
+G^k := cases(#G1($G^"I"$) &wide& k "ungerade", #G2($G^"II"$) &wide& k "gerade")
 $
 
 
@@ -143,11 +146,16 @@ $
 	||u^(2 r + 2)|| <= delta_q ||u^0||
 $
 
+mit
+$
+delta_q < 1
+$
+
 == Herangehensweise
 
-+ Konvergenzrate nach $r + 1$ Gauß-Seidel-Halbschritten
++ Konvergenzrate nach $r$ Gauß-Seidel-Halbschritten
 + Konvergenzrate nach Grobgitterkorrektur
-+ ...
++ Konvergenzrate nach einer vollständigen MG Iteration
 
 = Konvergenzrate beim Presmoothing
 
@@ -294,7 +302,7 @@ $
 			content((5, 5), $T_h$, anchor: "west", padding: 0.3)
 			content((3, 0), $u in S_h$, anchor: "north", padding: 0.2)
 			content((4.5, 1.5), $v = G_h^"I" u in T_h^perp$, anchor: "south-west", padding: 0.2)
-			content((1.5, 1.5), $w in T_h$, anchor: "south-east", padding: 0.2)
+			content((1.5, 1.5), $P_(T_h) u = w in T_h$, anchor: "south-east", padding: 0.2)
 		})
 		circle((0, 0), radius: 3pt, stroke: none, fill: black)
 		content((0, 0), $va(0)$, anchor: "south-east", padding: 0.2)
@@ -303,6 +311,16 @@ $
 		line((0, 0), (3, 3), mark: (end: ">"), stroke: 5pt)
 	})
 )
+
+#highlight[
+TODO: genau begründen, warum $G^"I" u in T^perp$
+
+1. $v = G^"I" u$
+2. $v perp T_h ==> v in T_h^perp$
+3. $T_h plus.o T_h^perp = S_h$
+4. $u in S_h ==> exists w in T_h$ s. th. $u = w + v$
+5. laut ... Satz ist diese Zerlegung eindeutig
+]
 
 == Gauß-Seidel-Halbschritte als Projektionen
 
@@ -560,9 +578,59 @@ $
 ==> ||u'|| &<= rho^(r / 2) sqrt(1/2 (1 - lambda^2)) ||u^0|| \
 &= rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||
 $
-with $rho := (2 lambda^2) / (lambda^2 + 1)$
+mit $rho := (2 lambda^2) / (lambda^2 + 1)$
 
 #highlight[TODO: Abbildung mit Smoothing-Steps und Grobgitterkorrektur]
+
+#highlight[possibly focus more on the first part]
+
+== Presmoothing + Exakte Grobgitterkorrektur
+
+#{
+let xs = lq.linspace(0, 1, num: 250)
+let r = 3
+show lq.selector(lq.legend): set grid(row-gutter: 1em)
+figure(
+	lq.diagram(
+		width: 100%,
+		height: 84%,
+		legend: (
+			position: (100% + 0.6em, 0%)
+		),
+		lq.plot(
+			xs,
+			x => calc.pow(x, r / 2),
+			label: $rho^(r/2)$,
+			mark: none,
+			stroke: 2pt,
+		),
+		lq.plot(
+			xs,
+			x => calc.sqrt((1 - x) / (2 - x)),
+			mark: none,
+			label: $sqrt((1 - rho) / (2 - rho))$,
+			stroke: 2pt,
+		),
+		lq.plot(
+			xs,
+			x => calc.pow(x, r / 2) * calc.sqrt((1 - x) / (2 - x)),
+			mark: none,
+			label: $rho^(r/2) sqrt((1 - rho) / (2 - rho))$,
+			stroke: 2pt,
+		),
+	)
+)
+}
+
+#place(
+	top + left,
+	dx: 79pt,
+	dy: 85pt,
+	$
+		(r = 3) \
+	$
+)
+
 
 == Exakte Grobgitterkorrektur ist Orthogonalprojektion
 
