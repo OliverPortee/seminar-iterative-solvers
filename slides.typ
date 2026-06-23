@@ -96,49 +96,94 @@ Oliver Portee
 
 #G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die gelben Punkte
 
+#let mg-scheme(r-half-steps: false, u-labels: false, presmoother-label: false) = {
+	import cetz.draw: line, content, scale, floating
 
+	scale(2.2)
+	let r = 4
+	for x in range(r) {
+		if x > 0 {
+			line((x + 0.3, 0), (x + 0.7, 0), mark: (end: ">"))
+		}
+		if calc.odd(x) {
+			content((x + 1, 0), G1($G^#(r - x)$))
+		} else {
+			content((x + 1, 0), G2($G^#(r - x)$))
+		}
+	}
+	line((r + 0.1, -0.3), (r + 0.5, -1.0), mark: (end: ">"))
+	content((r + 1, -1.5), align(center)[Grobgitterkorrektur])
+	line((r + 1.5, -1), (r + 1.9, -0.3), mark: (end: ">"))
+	for x in range(r + 1) {
+		if x > 0 {
+			line((r + 2 + x - 0.70, 0), (r + 2 + x - 0.3, 0), mark: (end: ">"))
+		}
+		if calc.even(x) {
+			content((r + 2 + x, 0), G1($G^#(x + 1)$))
+		} else {
+			content((r + 2 + x, 0), G2($G^#(x + 1)$))
+		}
+	}
+
+	if r-half-steps {
+		floating({
+			cetz.decorations.brace((0.7, 0.4), (4.3, 0.4), name: "rhalfsteps1")
+			content("rhalfsteps1.content", [$r$ Halbschritte])
+			cetz.decorations.brace((5.7, 0.4), (10.3, 0.4), name: "rhalfsteps2")
+			content("rhalfsteps2.content", [$r + 1$ Halbschritte])
+		})
+	}
+
+	if u-labels {
+		floating({
+			content((0.5, 0.5), $u^0$)
+			content((1.5, 0.5), $u^1$)
+			content((2.5, 0.5), $u^2$)
+			content((3.5, 0.5), $u^3$)
+			content((4.55, -0.5), $u^r$)
+			content((6.1, -0.8), $u^(r + 1)$)
+			content((10.8, 0.5), $u^(2 r + 2)$)
+		})
+	}
+
+	if presmoother-label {
+		floating({
+			cetz.decorations.brace((0.7, 0.4), (4.3, 0.4), name: "presmoother")
+			content("presmoother.content", [Pre-Smoother])
+			content((0.5, -0.5), $u^0$)
+			content((4.6, -0.5), $u^r$)
+		})
+	}
+}
 = Multigrid-Algorithmus
 
+#slide(repeat: 3, self => [
 
+#v(2em)
 #figure(
 	cetz.canvas({
 		import cetz.draw: line, content, scale
 
-		scale(2.2)
-		let r = 4
-		for x in range(r + 1) {
-			if x > 0 {
-				line((x - 0.70, 0), (x - 0.3, 0), mark: (end: ">"))
-			}
-			if calc.even(x) {
-				content((x, 0), G1($G^#(r + 1 - x)$))
-			} else {
-				content((x, 0), G2($G^#(r + 1 - x)$))
-			}
-		}
-		line((r + 0.1, -0.3), (r + 0.5, -1.0), mark: (end: ">"))
-		content((r + 1, -1.5), align(center)[coarse grid \ correction])
-		line((r + 1.5, -1), (r + 1.9, -0.3), mark: (end: ">"))
-		for x in range(r + 1) {
-			if x > 0 {
-				line((r + 2 + x - 0.70, 0), (r + 2 + x - 0.3, 0), mark: (end: ">"))
-			}
-			if calc.even(x) {
-				content((r + 2 + x, 0), G1($G^#(x + 1)$))
-			} else {
-				content((r + 2 + x, 0), G2($G^#(x + 1)$))
-			}
-		}
+		mg-scheme(
+			r-half-steps: self.subslide == 2,
+			u-labels: self.subslide == 3,
+		)
 	})
 )
 
 #v(2em)
 
-
 $
 G^k := cases(#G1($G^"I"$) &wide& k "ungerade", #G2($G^"II"$) &wide& k "gerade")
 $
 
+#place(
+	top + right,
+	dy: -27pt,
+	text(fill: gray)[Beispiel mit $r = 4$]
+)
+
+])
 
 ==  Wo wollen wir hin?
 
@@ -153,11 +198,31 @@ $
 
 == Herangehensweise
 
-+ Konvergenzrate nach $r$ Gauß-Seidel-Halbschritten
++ Konvergenzrate nach Pre-Smoothers
 + Konvergenzrate nach Grobgitterkorrektur
-+ Konvergenzrate nach einer vollständigen MG Iteration
++ Konvergenzrate nach Post-Smoother
 
-= Konvergenzrate beim Presmoothing
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme()
+	})
+)
+
+= Konvergenzrate des Pre-Smoothers
+
+== Pre-Smoother
+
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(presmoother-label: true)
+	})
+)
+#v(1em)
+$
+(||u^r||) / (||u^0||) <= space.thin?
+$
 
 
 == Aufspaltung des Funktionenraums
@@ -170,6 +235,8 @@ $S_h$ finite Elemente Raum mit einem Freiheitsgrad an jedem Gitterpunkt
 $S_H$ finite Elemente Raum mit einem Freiheitsgrad an jedem Grobgitterpunkt
 
 $T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}$
+
+#highlight[TODO: abbildung]
 
 
 == Basisfunktionen von $T_h$
@@ -444,15 +511,18 @@ $
 	}
 )
 
-== Bei $r$ Halbschritten
+== Konvergenzrate des Pre-Smoothers
 
 $
 ||u^r|| <= (sqrt(rho))^r ||u^0|| = rho^(r/2) ||u^0||
 $
 
-$rho^(r / 2)$ ... Konvergenzrate des Presmoothers #emoji.checkmark.box
-
-#highlight[TODO: Abbildung mit Smoothing-Steps]
+#v(3em)
+#figure(
+	cetz.canvas({
+		mg-scheme(presmoother-label: true)
+	})
+)
 
 
 = Konvergenzrate der Grobgitterkorrektur
@@ -628,6 +698,15 @@ figure(
 	dy: 85pt,
 	$
 		(r = 3) \
+	$
+)
+
+#place(
+	top + right,
+	dy: 232pt,
+	$
+		rho := (2 lambda^2) / (lambda^2 + 1) \
+		lambda := (|v^r|) / (||v^r||)
 	$
 )
 
