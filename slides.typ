@@ -96,7 +96,14 @@ Oliver Portee
 
 #G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die gelben Punkte
 
-#let mg-scheme(r-half-steps: false, u-labels: false, presmoother-label: false) = {
+#let mg-scheme(
+	r-half-steps: false,
+	u-labels: false,
+	presmoother-label: false,
+	exact-correction: false,
+	non-exact-correction: false,
+	g-labels: false,
+) = {
 	import cetz.draw: line, content, scale, floating
 
 	scale(2.2)
@@ -154,6 +161,40 @@ Oliver Portee
 			content((4.6, -0.5), $u^r$)
 		})
 	}
+
+	if exact-correction {
+		floating({
+			content((0.5, -0.5), $u^0$)
+			content((4.5, -0.5), $u^r$)
+			content((5.5, -0.5), $u'$)
+			content((5, -2), $u' = u^r - u^(q - 1)$)
+		})
+	}
+
+	if non-exact-correction {
+		floating({
+			content((4, -0.7), $u^r$)
+			content((6.15, -0.7), $u^(r + 1)$)
+			content((5, -2), $u^(r + 1) = u^r + v_1$)
+			content((5, -2.8), $v_1 approx u^(q - 1)$)
+		})
+	}
+
+	if g-labels {
+		content((0, 0), G1($G^5$))
+		line((0.3, 0), (0.7, 0), mark: (end: ">"))
+		
+		floating({
+			cetz.decorations.brace((-0.3, 0.4), (4.3, 0.4), name: "tilde-G")
+			content("tilde-G.content", $tilde(G)$)
+			cetz.decorations.brace((5.7, 0.4), (10.3, 0.4), name: "tilde-G-start")
+			content("tilde-G-start.content", $tilde(G)^*$)
+			content((-0.5, -0.5), $u^0$)
+			content((4.5, -0.5), $u^r$)
+			content((5.41, -0.5), $u^(r + 1)$)
+			content((10.7, -0.5), $u^(2 r + 2)$)
+		})
+	}
 }
 = Multigrid-Algorithmus
 
@@ -195,6 +236,8 @@ mit
 $
 delta_q < 1
 $
+
+#highlight[TODO: abbildung]
 
 == Herangehensweise
 
@@ -471,8 +514,6 @@ $
 
 == Der letzte Halbschritt ist am ineffektivsten
 
-
-
 #figure(
 	{
 		show lq.selector(lq.legend): set grid(row-gutter: 1em)
@@ -524,29 +565,23 @@ $
 	})
 )
 
-
 = Konvergenzrate der Grobgitterkorrektur
 
+== Exakte Grobgitterkorrektur
 
-Angenommen, we kennen schon die Konvergenzrate $delta_(q - 1)$:
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(exact-correction: true)
+	})
+)
+#v(2em)
 $
-delta := cases(0 &wide& "gröbstes Level", (delta_(q - 1))^mu &wide& "feinere Level")
-$
-
-$
-mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
-$
-
-$
-||v_1 - u^(q - 1)|| < delta ||u^(q - 1)||
+(||u'||) / (||u^r||) <= space.thin ?
 $
 
 
 == Exakte Grobgitterkorrektur
-
-$
-u' = u^r - u^(q - 1)
-$
 
 Exakte Lösung:
 $
@@ -639,7 +674,7 @@ $
 	||u'|| = ||u^r|| cos(alpha) <= sqrt(1/2 (1 - lambda^2)) ||u^r||
 $
 
-== Presmoothing + Exakte Grobgitterkorrektur
+== Pre-Smoother + Exakte Grobgitterkorrektur
 
 $
 ||u'|| <= sqrt(1/2 (1 - lambda^2)) ||u^r||  wide "und" wide ||u^r|| <= rho^(r / 2) ||u^0|| \
@@ -650,11 +685,23 @@ $
 $
 mit $rho := (2 lambda^2) / (lambda^2 + 1)$
 
-#highlight[TODO: Abbildung mit Smoothing-Steps und Grobgitterkorrektur]
+== Pre-Smoother + Exakte Grobgitterkorrektur
 
-#highlight[possibly focus more on the first part]
 
-== Presmoothing + Exakte Grobgitterkorrektur
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(exact-correction: true)
+	})
+)
+#v(1em)
+
+$
+||u'|| <= rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||
+$
+
+
+== Pre-Smoother + Exakte Grobgitterkorrektur
 
 #{
 let xs = lq.linspace(0, 1, num: 250)
@@ -710,6 +757,30 @@ figure(
 	$
 )
 
+== Nicht-Exakte Grobgitterkorrektur
+
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(non-exact-correction: true)
+	})
+)
+
+== Nicht-Exakte Grobgitterkorrektur
+
+
+Angenommen, we kennen schon die Konvergenzrate $delta_(q - 1)$:
+$
+delta := cases(0 &wide& "gröbstes Level", (delta_(q - 1))^mu &wide& "feinere Level")
+$
+
+$
+mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
+$
+
+$
+||v_1 - u^(q - 1)|| < delta ||u^(q - 1)||
+$
 
 == Exakte Grobgitterkorrektur ist Orthogonalprojektion
 
@@ -780,7 +851,21 @@ $
 	})
 )
 
-#highlight[TODO: $G$ einführen]
+== Smoother als Operator
+
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(g-labels: true)
+	})
+)
+
+$
+u^r = tilde(G) u^0 wide wide wide wide wide wide u^(2 r + 2) = tilde(G)^* u^(r + 1)
+$
+$
+(tilde(G) u, v) = (u, tilde(G)^* v)
+$
 
 == Fast Geschafft
 
@@ -964,3 +1049,13 @@ $
 		[*MG $mu = 2$ (W-cycle)*], $$, $0.187$, $0.120$, $0.087$
 	)
 )
+
+== Glätter und Grobgitterkorrektur minimieren Energiefunktional
+
+$
+G_h^"I" u &= limits("argmin")_(w in T_h) space J(u + w) &wide T_h &:= {w in S_h | w(p_i) = 0 "falls" p_i "grob"} \
+G_h^"II" u &= limits("argmin")_(w in hat(T)_h) space J(u + w) &wide hat(T)_h &:= {w in S_h | w(p_i) = 0 "falls" p_i "fein"} \
+u^(q - 1) &= limits("argmin")_(v in S_H) space J(u^r + v) &wide S_H &= "Grobgitterfunktionsraum"
+$
+
+wenn das Energiefunktional über Raum $u + V$ minimiert wird, steht das Ergebnis senkrecht auf $V$
