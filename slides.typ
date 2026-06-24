@@ -252,8 +252,6 @@ Oliver Portee
 		})
 	}
 }
-= Multigrid-Algorithmus
-
 
 == Gauß-Seidel-Relaxation
 
@@ -380,58 +378,69 @@ $
 (G_h^"I" u)_i := cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H, u_i &wide& p_i in Omega_H)
 $
 
-#figure(
-	cetz.canvas({
-		import cetz.draw: circle, line, content, scale, floating
+#let fine-neighborhood =  cetz.canvas({
+	import cetz.draw: circle, line, content, scale, floating
 
-		let grid-point(coords) = circle(
-			coords,
-			radius: 2pt,
-			stroke: none,
-			fill: if even(coords.at(0) + coords.at(1)) {
-				fine-color
-			} else {
-				coarse-color
-			}
-		)
+	let grid-point(coords) = circle(
+		coords,
+		radius: 2pt,
+		stroke: none,
+		fill: if even(coords.at(0) + coords.at(1)) {
+			fine-color
+		} else {
+			coarse-color
+		}
+	)
 
-		let p0 = ( 0,  0)
-		let p1 = ( 0, -1)
-		let p2 = ( 1,  0)
-		let p3 = ( 0,  1)
-		let p4 = (-1,  0)
-		let p5 = ( 1, -1)
-		let p6 = ( 1,  1)
-		let p7 = (-1,  1)
-		let p8 = (-1, -1)
+	let p0 = ( 0,  0)
+	let p1 = ( 0, -1)
+	let p2 = ( 1,  0)
+	let p3 = ( 0,  1)
+	let p4 = (-1,  0)
+	let p5 = ( 1, -1)
+	let p6 = ( 1,  1)
+	let p7 = (-1,  1)
+	let p8 = (-1, -1)
 
-		scale(3)
+	scale(3)
 
-		line(p5, p6, p7, p8, close: true)
-		line(p1, p2, p3, p4, close: true)
-		line(p1, p3)
-		line(p2, p4)
+	line(p5, p6, p7, p8, close: true)
+	line(p1, p2, p3, p4, close: true)
+	line(p1, p3)
+	line(p2, p4)
 
-		grid-point(p0)
-		grid-point(p1)
-		grid-point(p2)
-		grid-point(p3)
-		grid-point(p4)
-		grid-point(p5)
-		grid-point(p6)
-		grid-point(p7)
-		grid-point(p8)
+	grid-point(p0)
+	grid-point(p1)
+	grid-point(p2)
+	grid-point(p3)
+	grid-point(p4)
+	grid-point(p5)
+	grid-point(p6)
+	grid-point(p7)
+	grid-point(p8)
 
-		floating({
-			content(p0, $0$, anchor: "north-west", padding: 0.3)
-			content(p1, $1$, anchor: "north", padding: 0.3)
-			content(p2, $2$, anchor: "west", padding: 0.3)
-			content(p3, $3$, anchor: "south", padding: 0.3)
-			content(p4, $4$, anchor: "east", padding: 0.3)
-
-			content((0, -1.6), $u_0 <--^(G_h^"I") 1/4 (u_1 + u_2 + u_3 + u_4)$)
-		})
+	floating({
+		content(p0, $0$, anchor: "north-west", padding: 0.3)
+		content(p1, $1$, anchor: "north", padding: 0.3)
+		content(p2, $2$, anchor: "west", padding: 0.3)
+		content(p3, $3$, anchor: "south", padding: 0.3)
+		content(p4, $4$, anchor: "east", padding: 0.3)
 	})
+})
+
+#place(
+	top + left,
+	dy: 190pt,
+	fine-neighborhood,
+)
+
+
+#place(
+	dy: 118pt,
+	dx: 330pt,
+	$
+		u_0 <--^(G_h^"I") 1/4 (u_1 + u_2 + u_3 + u_4)
+	$
 )
 
 
@@ -444,17 +453,45 @@ J(v) :&= a(v, v) - cancel(2 (f, v)_0) \
 &= sum_vec(i\, j, d(i, j) = h, delim: #none) (v_i - v_j)^2
 $
 
+#place(
+	top + left,
+	dy: 190pt,
+	fine-neighborhood,
+)
+
 == Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $G_h^"I"$ minimiert $J(v)$ über $u + T_h$, denn:
+
+#place(top + left,
+	dy: 190pt,
+	dx: 240pt,
 $
 v_0 = 1/4 (v_1 + v_2 + v_3 + v_4) \
 "minimiert" \
 (v_1 - v_0)^2 + (v_2 - v_0)^2 + (v_3 - v_0)^2 + (v_4 - v_0)^2
 $
+)
+
+
+#place(
+	top + left,
+	dy: 190pt,
+	fine-neighborhood,
+)
 
 == Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
+
+#place(
+	top + left,
+	dx: 464pt,
+	dy: 60pt,
+	image("images/3d-surface.png", width: 42%)
+)
+
+
+#box([
 $
 v := G_h^"I" u \
 J(v + w) >= J(v) wide forall w in T_h
@@ -464,6 +501,8 @@ alternativ:
 $
 lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 0 wide forall w in T_h, epsilon in RR
 $
+])
+
 
 == Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
