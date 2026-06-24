@@ -25,8 +25,6 @@ Teil 2
 Oliver Portee
 ]
 
-= Gauß-Seidel Relaxation
-
 #let fine-color = lq.color.map.petroff10.at(0)
 #let coarse-color = lq.color.map.petroff10.at(1)
 
@@ -34,20 +32,78 @@ Oliver Portee
 #let G1(content) = Gbox(content, fine-color)
 #let G2(content) = Gbox(content, coarse-color)
 
-#let draw-grid(show-th: false) = {
-	import cetz.draw: line, circle
 
-	let W = 6
-	let H = 4
+#let W = 6
+#let H = 4
 
-	let grid-point(x, y) = {
-		let fill = if even(x + y) {
-			coarse-color
-		} else {
-			fine-color
-		}
-		cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
+#let grid-point(x, y) = {
+	let fill = if even(x + y) {
+		coarse-color
+	} else {
+		fine-color
 	}
+	cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
+}
+
+
+#let draw-coarse-grid() = {
+	import cetz.draw: line
+	for x in range(0, W + 1, step: 2) {
+		line((x, 0), (x, H))
+	}
+	for y in range(0, H + 1, step: 2) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
+			}
+		}
+	}
+	for x in range(0, W + 1, step: 2) {
+		for y in range(0, H + 1, step: 2) {
+			grid-point(x, y)
+		}
+	}
+	for x in range(1, W + 1, step: 2) {
+		for y in range(1, H + 1, step: 2) {
+			grid-point(x, y)
+		}
+	}
+}
+
+#let draw-th-grid() = {
+	import cetz.draw: line
+
+	for x in range(W + 1) {
+		line((x, 0), (x, H))
+	}
+	for y in range(H + 1) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
+			}
+		}
+	}
+	for x in range(W + 1) {
+		for y in range(H + 1) {
+			if odd(x + y) {
+				grid-point(x, y)
+			}
+		}
+	}
+}
+
+#let draw-grid(show-th: false) = {
+	import cetz.draw: line
 
 	if show-th {
 		let color = navy
@@ -78,7 +134,6 @@ Oliver Portee
 			}
 		}
 	}
-	
 	for x in range(W + 1) {
 		for y in range(H + 1) {
 			grid-point(x, y)
@@ -86,15 +141,16 @@ Oliver Portee
 	}
 }
 
-#figure(
-	cetz.canvas({
-		cetz.draw.scale(2)
-		draw-grid()
-	})
-)
 
-
-#G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die gelben Punkte
+#let right-angle(pos, start: 0deg) = {
+	import cetz.draw: arc, circle
+	arc(pos, anchor: "origin", start: start, stop: start + 90deg)
+	let r = 0.57
+	let dx = r * calc.cos(start + 45deg)
+	let dy = r * calc.sin(start + 45deg)
+	let label-pos = (pos.at(0) + dx, pos.at(1) + dy)
+	circle(label-pos, stroke: none, fill: black, radius: 1pt)
+}
 
 #let mg-scheme(
 	r-half-steps: false,
@@ -198,13 +254,24 @@ Oliver Portee
 }
 = Multigrid-Algorithmus
 
+
+== Gauß-Seidel-Relaxation
+
+#figure(
+	cetz.canvas({
+		cetz.draw.scale(2)
+		draw-grid()
+	})
+)
+
+#G1($G^"I"$) glättet die blauen Punkte #h(1fr) #G2($G^"II"$) glättet die gelben Punkte
+
+== 
 #slide(repeat: 3, self => [
 
 #v(2em)
 #figure(
 	cetz.canvas({
-		import cetz.draw: line, content, scale
-
 		mg-scheme(
 			r-half-steps: self.subslide == 2,
 			u-labels: self.subslide == 3,
@@ -229,15 +296,15 @@ $
 ==  Wo wollen wir hin?
 
 $
-	||u^(2 r + 2)|| <= delta_q ||u^0||
+	||u^(2 r + 2)|| <= delta_q ||u^0|| wide "mit" wide delta_q < 1
 $
+#v(2em)
+#figure(
+	cetz.canvas({
+		mg-scheme(u-labels: true)
+	})
+)
 
-mit
-$
-delta_q < 1
-$
-
-#highlight[TODO: abbildung]
 
 == Herangehensweise
 
@@ -273,31 +340,41 @@ $
 S_h = S_H plus.o T_h
 $
 
-$S_h$ finite Elemente Raum mit einem Freiheitsgrad an jedem Gitterpunkt
+#figure(
+	cetz.canvas({
+		import cetz.draw: content, translate, scale
+		scale(1.1)
+		draw-grid()
+		content((7, 2), $=$)
+		translate(x: 8)
+		draw-coarse-grid()
+		content((7, 2), $plus.o$)
+		translate(x: 8)
+		draw-th-grid()
+	})
+)
 
-$S_H$ finite Elemente Raum mit einem Freiheitsgrad an jedem Grobgitterpunkt
 
-$T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}$
 
-#highlight[TODO: abbildung]
 
+$
+T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}
+$
 
 == Basisfunktionen von $T_h$
 
-#slide(repeat: 2, self => [
-	#figure(
-		cetz.canvas({
-			cetz.draw.scale(2)
-			draw-grid(show-th: self.subslide > 1)
-		})
-	)
+#figure(
+	cetz.canvas({
+		cetz.draw.scale(2)
+		draw-grid(show-th: true)
+	})
+)
 
-	$
-	T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}
-	$
-])
+$
+T_h = {w in S_h | w(p_i) = 0 "falls" p_i #G2("Grobgitterpunkt")}
+$
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $
 (G_h^"I" u)_i := cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H, u_i &wide& p_i in Omega_H)
@@ -358,7 +435,7 @@ $
 )
 
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $G_h^"I"$ minimiert $J(v)$ über $u + T_h$, denn:
 $
@@ -367,7 +444,7 @@ J(v) :&= a(v, v) - cancel(2 (f, v)_0) \
 &= sum_vec(i\, j, d(i, j) = h, delim: #none) (v_i - v_j)^2
 $
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $G_h^"I"$ minimiert $J(v)$ über $u + T_h$, denn:
 $
@@ -376,7 +453,7 @@ v_0 = 1/4 (v_1 + v_2 + v_3 + v_4) \
 (v_1 - v_0)^2 + (v_2 - v_0)^2 + (v_3 - v_0)^2 + (v_4 - v_0)^2
 $
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $
 v := G_h^"I" u \
@@ -388,7 +465,7 @@ $
 lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 0 wide forall w in T_h, epsilon in RR
 $
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
 $
 dv(, epsilon) J(v + epsilon w) &= dv(, epsilon) a(v + epsilon w, v + epsilon w) \
@@ -400,52 +477,45 @@ $
 a(v, w) =^! 0 wide forall w in T_h
 $
 
-== Gauß-Seidel-Halbschritte als Projektionen
+== Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
+#slide(repeat: 4, self => [
 #figure(
 	cetz.canvas({
 		import cetz.draw: line, content, scale, floating, circle
 		scale(1.8)
 		line((-1, -1), (5, 5), stroke: 2pt)
 		floating({
-			content((-4, 5), $S_h = S_H plus.o T_h$, anchor: "west")
+			content((-4, 5), $S_h = T_h plus.o T_h^perp$, anchor: "west")
+			content((-4, 4), $v perp T_h$, anchor: "west")
+			content((-4, 3), $P_(T_h^perp) u = P_(T_h^perp) v$, anchor: "west")
 			content((5, 5), $T_h$, anchor: "west", padding: 0.3)
-			content((3, 0), $u in S_h$, anchor: "north", padding: 0.2)
-			content((4.5, 1.5), $v = G_h^"I" u in T_h^perp$, anchor: "south-west", padding: 0.2)
-			content((1.5, 1.5), $P_(T_h) u = w in T_h$, anchor: "south-east", padding: 0.2)
+			if self.subslide < 4 {
+				content((4.5, 1.5), $v = G_h^"I" u in T_h^perp$, anchor: "south-west", padding: 0.2)
+			}
+			if self.subslide >= 2 {
+				content((3, 0), $u in S_h$, anchor: "north", padding: 0.2)
+			}
+			if self.subslide >= 3 {
+				content((1.5, 1.5), $P_(T_h) u = w in T_h$, anchor: "south-east", padding: 0.2)
+			}
+			if self.subslide >= 4 {
+				content((4.5, 0.5), $v &= u - w = u - P_(T_h) u \ &= underbrace((I - P_(T_h)), G_h^"I") u$, anchor: "south-west", padding: 0.2)
+			}
 		})
+		right-angle((3, 3), start: 225deg)
 		circle((0, 0), radius: 3pt, stroke: none, fill: black)
 		content((0, 0), $va(0)$, anchor: "south-east", padding: 0.2)
-		line((0, 0), (6, 0), mark: (end: ">"), stroke: 5pt)
+		if self.subslide >= 2 {
+			line((0, 0), (6, 0), mark: (end: ">"), stroke: 5pt)
+		}
+		if self.subslide >= 3 {
+			line((0, 0), (3, 3), mark: (end: ">"), stroke: 5pt)
+		}
 		line((3, 3), (6, 0), mark: (end: ">"), stroke: 5pt)
-		line((0, 0), (3, 3), mark: (end: ">"), stroke: 5pt)
 	})
 )
-
-#highlight[
-TODO: genau begründen, warum $G^"I" u in T^perp$
-
-1. $v = G^"I" u$
-2. $v perp T_h ==> v in T_h^perp$
-3. $T_h plus.o T_h^perp = S_h$
-4. $u in S_h ==> exists w in T_h$ s. th. $u = w + v$
-5. laut ... Satz ist diese Zerlegung eindeutig
-]
-
-== Gauß-Seidel-Halbschritte als Projektionen
-
-- sei $P u$ die Orthogonalprojektion von $u$ auf $T_h$
-#pause
-- dann ist $w = P u$ und $v = u - P u = underbrace((I - P), G_h^"I") u$
-#pause
-- $G_h^"I"$ ist eine Orthogonalprojektion $T_h^perp$
-#pause
-- übertragbar auf $G_h^"II"$, bloß dass dann \
-	$T_h = {w in S_h | w(p_i) = 0 "falls" p_i in Omega_h \\ Omega_H}$
-#pause
-- Orthogonalprojektionen sind selbstadjungiert
-
-#highlight[TODO: weniger Stichpunkte]
+])
 
 == Adjungierte Operatoren
 
@@ -610,14 +680,6 @@ $
 #let picture = cetz.canvas({
 		import cetz.draw: *
 
-		let right-angle(pos, start: 0deg) = {
-			arc(pos, anchor: "origin", start: start, stop: start + 90deg)
-			let r = 0.57
-			let dx = r * calc.cos(start + 45deg)
-			let dy = r * calc.sin(start + 45deg)
-			let label-pos = (pos.at(0) + dx, pos.at(1) + dy)
-			circle(label-pos, stroke: none, fill: black, radius: 1pt)
-		}
 		
 		scale(1.5)
 		line((0, 0), (-4, 5), mark: (end: ">"), stroke: 2pt)
@@ -795,6 +857,7 @@ $
 		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
 		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
 		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
+		right-angle((6, 0), start: 90deg)
 
 		floating({
 			content((3, 3), $u^r$, anchor: "south-east")
