@@ -1125,6 +1125,15 @@ $
 	)
 )
 
+#place(
+	top + left,
+	dx: 350pt,
+	dy: 12pt,
+	$
+		delta_q = max_(0 <= rho <= 1) rho^r (1 - rho) / (2 - rho)
+	$
+)
+
 == Multigrid-Konvergenz
 
 $
