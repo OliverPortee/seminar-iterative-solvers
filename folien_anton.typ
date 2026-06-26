@@ -441,7 +441,7 @@ $N(i)$ ist die Menge aller benachbarten Punkte mit Abstand $h$ von $p_i$.
 
 == Konvergenz
 
-*Lemma 4.1.* $Omega$ konvex. Falls $u = G_h^"I" u$, dann
+*Lemma * $Omega$ konvex. Falls $u = G_h^"I" u$, dann
 $
  ||G_h^"II" u|| <= |u|.
 $
@@ -449,7 +449,6 @@ $
 #hi[Intuition: ein Gauß-Seidel-Halbschritt kann die Energienorm nicht über die Seminorm hinaus erhöhen — der Schritt "glättet" mindestens so viel, wie auf dem groben Gitter ohnehin schon an Energie steckt.]
 
 
-= Beweis von Lemma 4.1
 
 #let diamond-fig() = cetz.canvas({
 	import cetz.draw: *
@@ -513,25 +512,25 @@ $
 $
 
 
-== Korollar 4.2
+== Finaler Schritt
 
-Sei $Omega$ konvex. Dann gilt für *jedes* $u in S_h$ (ohne Voraussetzung!)
+Sei $Omega$ konvex. Dann gilt für *jedes* $u in S_h$
 $
 ||G_h^"II" dot G_h^"I" u|| <= |u|.
 $
 
-#pause
-*Beweis:* Setze $u' := G_h^"I" u$. Dann ist $u' = G_h^"I" u'$ (Idempotenz), also greift Lemma 4.1 auf $u'$:
+
+*Beweis:* Setze $u' := G_h^"I" u$. Dann ist $u' = G_h^"I" u'$ (Idempotenz), also greift das Lemma auf $u'$:
 $
 ||G_h^"II" u'|| <= |u'|
 $
 
-#pause
+
 Außerdem ändert $G_h^"I"$ nur den $w$-Anteil ($T_h$-Teil), nicht den $v$-Anteil — und $|dot|$ hängt nur vom $v$-Anteil ab (vgl. $|u| = |v|$ aus der Zerlegung $u = v + w$):
 $
 |u'| = |G_h^"I" u| = |u|
 $
-#pause
+
 $
 ==> ||G_h^"II" G_h^"I" u|| <= |u| wide forall u in S_h. wide qed
 $
