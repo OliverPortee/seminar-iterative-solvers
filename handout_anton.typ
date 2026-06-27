@@ -10,6 +10,153 @@
 
 #title[Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
 
+#let definition-box(body) = box(
+	stroke: 1pt,
+	inset: 7pt,
+	width: 100%,
+	body
+)
+
+#let fine-color = lq.color.map.petroff10.at(0)
+#let coarse-color = lq.color.map.petroff10.at(1)
+
+#let Gbox(content, color) = box(fill: color.transparentize(70%), inset: (top: 7pt, bottom: 4pt, left: 3pt, right: 2pt), radius: 5pt, stroke: color, baseline: 15%, content)
+#let G1(content) = Gbox(content, fine-color)
+#let G2(content) = Gbox(content, coarse-color)
+
+#let W = 6
+#let H = 4
+
+#let grid-point(x, y) = {
+	let fill = if even(x + y) {
+		coarse-color
+	} else {
+		fine-color
+	}
+	cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
+}
+
+
+#let draw-coarse-grid() = {
+	import cetz.draw: line
+	for x in range(0, W + 1, step: 2) {
+		line((x, 0), (x, H))
+	}
+	for y in range(0, H + 1, step: 2) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
+			}
+		}
+	}
+	for x in range(0, W + 1, step: 2) {
+		for y in range(0, H + 1, step: 2) {
+			grid-point(x, y)
+		}
+	}
+	for x in range(1, W + 1, step: 2) {
+		for y in range(1, H + 1, step: 2) {
+			grid-point(x, y)
+		}
+	}
+}
+
+#let draw-2h-grid() = {
+	import cetz.draw: line
+	for x in range(0, W + 1, step: 2) {
+		line((x, 0), (x, H))
+	}
+	for y in range(0, H + 1, step: 2) {
+		line((0, y), (W, y))
+	}
+	for x in range(0, W, step: 2) {
+		for y in range(0, H, step: 2) {
+			if odd(int(x / 2) + int(y / 2)) {
+				line((x + 2, y), (x, y + 2))
+			} else {
+				line((x, y), (x + 2, y + 2))
+			}
+		}
+	}
+	for x in range(0, W + 1, step: 2) {
+		for y in range(0, H + 1, step: 2) {
+			grid-point(x, y)
+		}
+	}
+}
+
+#let draw-th-grid() = {
+	import cetz.draw: line
+
+	for x in range(W + 1) {
+		line((x, 0), (x, H))
+	}
+	for y in range(H + 1) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
+			}
+		}
+	}
+	for x in range(W + 1) {
+		for y in range(H + 1) {
+			if odd(x + y) {
+				grid-point(x, y)
+			}
+		}
+	}
+}
+
+#let draw-grid(show-th: false) = {
+	import cetz.draw: line
+
+	if show-th {
+		let color = navy
+		for x in range(1, W) {
+			for y in range(1, H) {
+				if odd(x + y) {
+					line((x, y), (x + 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: -45deg), stroke: none)
+					line((x, y), (x + 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 45deg), stroke: none)
+					line((x, y), (x - 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 135deg), stroke: none)
+					line((x, y), (x - 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: 225deg), stroke: none)
+				}
+			}
+		}
+	}
+	
+	for x in range(W + 1) {
+		line((x, 0), (x, H))
+	}
+	for y in range(H + 1) {
+		line((0, y), (W, y))
+	}
+	for x in range(W) {
+		for y in range(H) {
+			if odd(x + y) {
+				line((x + 1, y), (x, y + 1))
+			} else {
+				line((x, y), (x + 1, y + 1))
+			}
+		}
+	}
+	for x in range(W + 1) {
+		for y in range(H + 1) {
+			grid-point(x, y)
+		}
+	}
+}
+
+
 = Setup
 
 Poisson equation with Dirichlet boundary conditions
@@ -26,57 +173,20 @@ Omega_H &: "Dreiecke mit Kantenlängen" sqrt(2) h "und" 2 h \
 Omega_(2h) &: "Dreiecke mit Kantenlängen" 2h "und" 2 sqrt(2) h
 $
 
-#let all-blue(x, y) = blue
-#let checkerboard(x, y) = if calc.even(x + y) { blue } else { white }
-#let coarse-grid(x, y) = if calc.even(x) and calc.even(y) { blue } else { white }
-
-#let thick-edge = 1.2pt
-#let thin-edge = 0.25pt
-
-#let single-color-grid(color-fn, real-axis: c => true, real-diag: (x, y) => true) = {
-	import cetz.draw: *
-	for y in range(H + 1) {
-		line((0, y), (W, y), stroke: if real-axis(y) { thick-edge } else { thin-edge })
-	}
-	for x in range(W + 1) {
-		line((x, 0), (x, H), stroke: if real-axis(x) { thick-edge } else { thin-edge })
-	}
-	for x in range(W) {
-		for y in range(H) {
-			let stroke = if real-diag(x, y) { thick-edge } else { thin-edge }
-			if calc.even(x + y) {
-				line((x, y), (x + 1, y + 1), stroke: stroke)
-			} else {
-				line((x + 1, y), (x, y + 1), stroke: stroke)
-			}
-		}
-	}
-	for x in range(W + 1) {
-		for y in range(H + 1) {
-			circle((x, y), radius: 4pt, fill: color-fn(x, y), stroke: black + 0.4pt)
-		}
-	}
-}
-
-#let coarse-diag-real(x, y) = {
-	let tmp = int(x / 2) + int(y / 2) + 1
-	(calc.even(tmp) and calc.even(x + y)) or (calc.odd(tmp) and calc.odd(x + y))
-}
-
 #figure(
 	cetz.canvas({
-		import cetz.draw: *
+		import cetz.draw: content, translate, scale
 		scale(0.7)
-		scale(y: -100%)
-		single-color-grid(all-blue)
-		content((W / 2, -1), $Omega_h$)
+		draw-grid()
+		content((W / 2, H + 0.5), $Omega_h$)
 		translate(x: 8)
-		single-color-grid(checkerboard, real-axis: c => calc.even(c))
-		content((W / 2, -1), $Omega_H$)
+		draw-coarse-grid()
+		content((W / 2, H + 0.5), $Omega_H$)
 		translate(x: 8)
-		single-color-grid(coarse-grid, real-axis: c => calc.even(c), real-diag: coarse-diag-real)
-		content((W / 2, -1), $Omega_(2 h)$)
-	})
+		draw-2h-grid()
+		content((W / 2, H + 0.5), $Omega_(2h)$)
+	}),
+	caption:["The grid is divided into fine points (blue) and coarse points (yellow)"]
 )
 
 = Decomposition
@@ -87,101 +197,37 @@ S_H &: "finite Elemente Raum auf" Omega_H \
 T_h &:= {w in S_h | w(p) = 0 wide forall p in Omega_H}
 $
 
-#let decomp-fine-edges() = {
-	import cetz.draw: line
-	for y in range(H + 1) {
-		line((0, y), (W, y), stroke: black)
-	}
-	for x in range(W + 1) {
-		line((x, 0), (x, H), stroke: black)
-	}
-	for x in range(W) {
-		for y in range(H) {
-			if calc.even(x + y) {
-				line((x, y), (x + 1, y + 1), stroke: black)
-			} else {
-				line((x + 1, y), (x, y + 1), stroke: black)
-			}
-		}
-	}
-}
-
-#let decomp-coarse-edges() = {
-	import cetz.draw: line
-	for y in range(0, H + 1, step: 2) {
-		line((0, y), (W, y), stroke: black)
-	}
-	for x in range(0, W + 1, step: 2) {
-		line((x, 0), (x, H), stroke: black)
-	}
-	for x in range(W) {
-		for y in range(H) {
-			if calc.even(x + y) {
-				line((x, y), (x + 1, y + 1), stroke: black)
-			} else {
-				line((x + 1, y), (x, y + 1), stroke: black)
-			}
-		}
-	}
-}
-
-#let decomp-hatch = tiling(size: (6pt, 6pt))[
-	#place(line(start: (0%, 0%), end: (100%, 100%), stroke: 0.6pt))
-]
-
-#let decomp-points(mode) = {
-	import cetz.draw: circle
-	for x in range(W + 1) {
-		for y in range(H + 1) {
-			let on-SH = calc.even(x + y)
-			if mode == "u" {
-				if on-SH {
-					circle((x, y), radius: 4pt, fill: black, stroke: none)
-				} else {
-					circle((x, y), radius: 4pt, fill: decomp-hatch, stroke: black + 0.4pt)
-				}
-			} else if mode == "v" {
-				if on-SH {
-					circle((x, y), radius: 4pt, fill: black, stroke: none)
-				}
-			} else if mode == "w" {
-				if on-SH {
-					circle((x, y), radius: 4pt, fill: none, stroke: black + 0.4pt)
-				} else {
-					circle((x, y), radius: 4pt, fill: black, stroke: none)
-				}
-			}
-		}
-	}
-}
-
 #figure(
 	cetz.canvas({
-		import cetz.draw: *
+		import cetz.draw: content, translate, scale
 		scale(0.7)
-		scale(y: -100%)
-		decomp-fine-edges()
-		decomp-points("u")
-		content((W / 2, H + 1), $u in S_h$)
-		content((7, H / 2), $=$)
+		draw-grid()
+		content((7, 2), $=$)
+		content((W/2, -0.5), $u in S_h$)
 		translate(x: 8)
-		decomp-coarse-edges()
-		decomp-points("v")
-		content((W / 2, H + 1), $v in S_H$)
-		content((7, H / 2), $plus.o$)
+		draw-coarse-grid()
+		content((7, 2), $plus.o$)
+		content((W/2, -0.5), $v in S_H$)
 		translate(x: 8)
-		decomp-fine-edges()
-		decomp-points("w")
-		content((W / 2, H + 1), $w in T_h$)
-	})
+		draw-th-grid()
+		content((W/2, -0.5), $w in T_h$)
+	}),
+	caption: [The space $S_h$ of the fine grid can be expressed as a sum of the space $S_H$ on the coarse grid (middle) and the space $T_h$ (right).]
 )
-
-#hi[At the grid points $Omega_h \\ Omega_H$, $v$ is not zero, but rather the interpolated value of its neighboring points.]
 
 $
 S_h &= S_H plus.o T_h wide u &= v plus w
 $
 
+The basis functions of $T_h$ form pyramid-like patterns. As a result, all functions in $T_h$ are zero on the diagonal lines through the coarse grid points.
+
+#figure(
+	cetz.canvas({
+		cetz.draw.scale(0.8)
+		draw-grid(show-th: true)
+	}),
+	caption: [Each shaded are corresponds to one of the basis functions of $T_h$. The supports of the respective basis functions are disjoint (they do not overlap each other).]
+)
 = Norms
 
 For $u, v in S_h$, we define the bilinear form
@@ -546,23 +592,156 @@ u_i = 1/4 sum_(j = 1)^4 u_j + b_i
 $
 where $b_i = integral_Omega f phi_i$ is the right-hand side. In the following section, we will be concerned with the error of our approximation for $u$. Therefore, we assume that $b = 0$.
 
-We split the Gauss-Seidel relaxation into two steps ($eq.est$ red-black Gauss-Seidel). First, we will smooth the black points, then the green/red points. Formally,
+We split the Gauss-Seidel relaxation into two steps ($eq.est$ red-black Gauss-Seidel). First, we will smooth the fine points ($in Omega_h without Omega_H$), then the coarse points ($in Omega_H$). Formally,
 $
-(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H &wide& ("green/red"), 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H &wide& ("black")) \
-(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& ("green/red"), u_i &wide& p_i in Omega_h \\ Omega_H &wide& ("black"))
+(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H &wide& , 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H &wide& 
+) \
+(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& , u_i &wide& p_i in Omega_h \\ Omega_H &wide& )
 $
 
 Here, $N(i)$ is the set of neighboring points with distance h to $p_i$.
 
 *Lemma 4.1*
 
-We want to show: if $u = G_h^"I" u$ then
+Assume that $Omega$ is convex. We want to show: if $u = G_h^"I" u$ then
 $
  ||G_h^"II" u|| <= |u|.
 $
 
+half a Gauss-Seidel step decreases the energy norm beyond the seminorm - this means it is reduced by at least the factor $sqrt(rho)$.
 
-Let $macron(u) = G^"II" u$.
+*Proof.* For convenience we first ignore the boundary $partial Omega$; we comment on the necessary modifications at the end of the proof.
+
+Let $macron(u) := G_h^"II" u$, and fix a point $p_0 in Omega_H$ with its four neighbors $1,2,3,4$ at distance $h$, which necessarily lie in $Omega_h without Omega_H$ (cf. @fig:neighborhood, right).
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: line, circle, content, floating
+
+		let p0 = ( 0,  0)
+		let p1 = (-1, -1)
+		let p2 = ( 0, -1)
+		let p3 = ( 1, -1)
+		let p4 = ( 1,  0)
+		let p5 = ( 1,  1)
+		let p6 = ( 0,  1)
+		let p7 = (-1,  1)
+		let p8 = (-1,  0)
+
+		let d(coords, color) = circle(coords, fill: color, stroke: none, radius: 2pt)
+
+		line((-1.7, 0), (1.7, 0), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "xi")
+		floating(content("xi.end", $xi$, anchor: "north-west", padding: 0.05))
+		line((0, -1.7), (0, 1.7), stroke: (dash: "dashed", thickness: 0.5pt), mark: (end: ">"), name: "eta")
+		floating(content("eta.end", $eta$, anchor: "east", padding: 0.11))
+
+		line(p1, p3, p5, p7, close: true)
+		line(p3, p7)
+		line(p1, p5)
+		line(p4, p8)
+		line(p2, p6)
+		d(p1, olive)
+		d(p2, black)
+		d(p3, olive)
+		d(p4, black)
+		d(p5, olive)
+		d(p6, black)
+		d(p7, olive)
+		d(p8, black)
+		d(p0, red)
+		content(p2, $1$, anchor: "north-west", padding: 0.05)
+		content(p4, $2$, anchor: "north-west", padding: 0.05)
+		content(p6, $3$, anchor: "south-east", padding: 0.05)
+		content(p8, $4$, anchor: "south-east", padding: 0.05)
+		content((0.27, 0.37), $0$, anchor: "north-west", padding: 0.05)
+	}),
+	caption: [Point $p_0 in Omega_H$ and its four neighbors $1,2,3,4 in Omega_h without Omega_H$ at distance $h$]
+) <fig:lemma41-diamond>
+
+For arbitrary real numbers $z_1, z_2, z_3, z_4$ one has the algebraic identity
+$
+2 sum_(j=1)^4 z_j^2 = \ (z_1 - z_2)^2 + (z_2 - z_3)^2 + (z_3 - z_4)^2 + (z_4 - z_1)^2 + 1/2 (z_1 + z_2 + z_3 + z_4)^2 - 1/2 (z_1 - z_2 + z_3 - z_4)^2.
+$ <eq:diamond-identity>
+
+Since $macron(u) = G_h^"II" u$, the value at $p_0$ is by definition the mean of the (unaffected) values at its neighbors,
+$
+macron(u)_0 = 1/4 sum_(i=1)^4 macron(u)_i = 1/4 sum_(i=1)^4 u_i,
+$
+because $G_h^"II"$ leaves the values at $Omega_h without Omega_H$ unchanged. Put $z_i := macron(u)_i - macron(u)_0 = u_i - macron(u)_0$. Then
+$
+sum_(j=1)^4 z_j = sum_(j=1)^4 u_j - 4 macron(u)_0 = 0,
+$
+so the first-order term $1/2 (z_1+z_2+z_3+z_4)^2$ in @eq:diamond-identity vanishes, and dropping the remaining non-positive term $-1/2(z_1-z_2+z_3-z_4)^2$ only weakens the identity into an inequality. We obtain
+$
+sum_(j=1)^4 (macron(u)_j - macron(u)_0)^2 <= 1/2 [(u_1 - u_2)^2 + (u_2 - u_3)^2 + (u_3 - u_4)^2 + (u_4 - u_1)^2].
+$ <eq:step1>
+
+Recall from the definition of the energy norm (2.3) that, splitting the sum according to which grid the points belong to,
+$
+||macron(u)||^2 = sum_(i in Omega_H) sum_(j in Omega_h without Omega_H \ d(i,j) = h) (macron(u)_i - macron(u)_j)^2.
+$
+For fixed $i = p_0$, the inner sum is exactly the left-hand side of @eq:step1. Summing the bound @eq:step1 over all $p_0 in Omega_H$ therefore gives
+$
+||G_h^"II" u||^2 <= sum_(k,l in Omega_h without Omega_H \ d(k,l) = H) (u_k - u_l)^2,
+$ <eq:step2>
+where $H = sqrt(2) h$ is the distance between two opposite corners of the diamond in @fig:lemma41-diamond.
+
+#hi[Every pair $(k,l) in Omega_h without Omega_H$ with $d(k,l) = H$ occurs in the diamonds of *two* neighboring points $p_0 in Omega_H$. The factor $1/2$ on the right-hand side of @eq:step1 exactly compensates for this double counting, so no extra factor appears in @eq:step2.]
+
+This is the only place where the hypothesis $u = G_h^"I" u$ enters. Since $u = G_h^"I" u$, every point $k in Omega_h without Omega_H$ already satisfies the relaxation equation
+$
+u_k = 1/4 sum_(j in N(k)) u_j,
+$
+i.e. $u_k$ is the mean of its four neighbors, which lie in $Omega_H$.
+
+Consider a pair $k, l in Omega_h without Omega_H$ with $d(k,l) = H$, and let $1,3,5,7 in Omega_H$ be enumerated so that $1, 5$ are the neighbors shared in the relevant direction (cf. Figure 4 of Braess' paper). Using the mean-value property at $k$ and $l$,
+$
+16 (u_k - u_l)^2 = (u_1 + u_5 - u_3 - u_7)^2 <= 2(u_1 - u_3)^2 + 2(u_5 - u_7)^2,
+$
+where the last step is the elementary inequality $(a+b)^2 <= 2a^2 + 2b^2$ applied to $a = u_1 - u_3$, $b = u_5 - u_7$.
+
+Summing this over all pairs $(k,l)$ from @eq:step2 — each pair $(u_1 - u_3)^2$ now reappears for two different pairs $(k,l)$, which compensates the factor $1/4$ — we obtain
+$
+||G_h^"II" u||^2 <= 1/4 sum_(m,n in Omega_H \ d(m,n) = 2H) (u_m - u_n)^2.
+$ <eq:step3>
+The points $m,n$ are again in $Omega_H$, but now at distance $2H = 2 sqrt(2) h$: these are exactly the two diagonals of a square of side length $2h$ with corners in $Omega_H$.
+
+It remains to bound such diagonals by sides of length $2h$. Let $1,2,3,4 in Omega_H$ be the corners of such a square, in cyclic order, so that $(u_1-u_3)^2$ and $(u_2-u_4)^2$ are the two diagonal terms appearing in @eq:step3. A direct expansion gives the identity
+$
+(u_1 - u_3)^2 + (u_2 - u_4)^2 = \ (u_1-u_2)^2 + (u_2-u_3)^2 + (u_3-u_4)^2 + (u_4-u_1)^2 - (u_1 - u_2 + u_3 - u_4)^2,
+$
+and dropping the (non-positive) last term yields
+$
+(u_1-u_3)^2 + (u_2-u_4)^2 <= (u_1-u_2)^2 + (u_2-u_3)^2 + (u_3-u_4)^2 + (u_4-u_1)^2,
+$
+i.e. the sum of the two diagonals is bounded by the sum of the four sides of the square (each of length $2h$).
+
+Every side of length $2h$ is shared by exactly two neighboring squares, so summing this inequality over all squares with corners in $Omega_H$ and combining with @eq:step3 gives
+$
+||G_h^"II" u||^2 <= 1/2 sum_(n,m in Omega_H \ d(n,m) = 2h) (u_n - u_m)^2 = |u|^2,
+$
+which is exactly the definition of the seminorm $|dot|$ from (2.4). This proves
+$
+||G_h^"II" u|| <= |u|.
+$
+
+Near $partial Omega$, some of the neighbors $1,2,3,4$ (or $1,3,5,7$) used above may not exist inside $Omega$; by the homogeneous Dirichlet condition, the corresponding values are simply replaced by $0$. The same telescoping arguments go through verbatim with these zero values inserted — only the index bookkeeping becomes more tedious, while every inequality used above (@eq:diamond-identity, the mean-value property, the diagonal identity) remains valid for boundary configurations as well, consistent with how the doubled weight in (2.5) was introduced for the seminorm. $qed$
+
+As a consequence of Lemma 4.1 we have the following corollary.
+
+*Corollary 4.2.* If $Omega$ is convex, then $||G_h^"II" dot G_h^"I" u|| <= |u|$ for every $u in S_h$ — i.e. the hypothesis $u = G_h^"I" u$ in Lemma 4.1 can be dropped, at the price of applying $G_h^"I"$ first.
+
+*Proof.* Put $u' := G_h^"I" u$. Since $G_h^"I"$ is idempotent ($G_h^"I" G_h^"I" = G_h^"I"$), we have $u' = G_h^"I" u'$, so Lemma 4.1 applies to $u'$:
+$
+||G_h^"II" u'|| <= |u'|.
+$
+Now $G_h^"I"$ only changes the $w$-part of the decomposition $u = v+w$ (it leaves the values at $Omega_H$, i.e. the $v$-part, untouched), and the seminorm $|dot|$ depends only on the $v$-part by (3.3). Hence
+$
+|u'| = |G_h^"I" u| = |u|,
+$
+and combining the two displays gives $||G_h^"II" G_h^"I" u|| <= |u|$ for every $u in S_h$. $qed$
+
+#hi[We note that the constant $1$ in (4.2) is best possible, since the convergence rate of the (pure) Gauss-Seidel iteration is known to be close to $1$, with $||G_h^"II" dot G_h^"I"|| = 1 - O(h^2)$.]
 
 = Alternate Method
 

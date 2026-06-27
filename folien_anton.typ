@@ -211,6 +211,28 @@ $
 
 #hi[Das ist eine *Seminorm*: $|u| = 0$ ist möglich, obwohl $u != 0$ — nämlich wenn $u$ nur auf den schwarzen (feinen) Punkten variiert.]
 
+== Ziel: Konvergenzrate bestimmen
+
+Wir wollen eine Konstante finden sodass gilt:
+
+$
+  ||u^(k+1)|| <= C * ||u||
+$
+
+== Konvergenzrate Gauss-Seidel
+
+Hierfür betrachten wir zuerst die Gauss-Seidel Relaxation auf dem feinsten Gitter. Hier wollen wir zeigen, dass
+
+$
+(1) wide |u^k| <= sqrt(rho) dot ||u^k|| wide "(Der grobe Fehler ist kleiner als der feine)" \
+
+(2) wide ||u^(k+1)|| <= |u^k| wide "(der feine Fehler" \ " im nächsten Schritt ist kleiner als der Grobe Fehler im vorherigen)"
+$
+
+$
+==> wide ||u^(k+1)|| <= sqrt(rho) dot ||u^k||
+$
+
 == Vergleich $|u| <= ||u||$
 
 #pause
@@ -343,43 +365,8 @@ $
 ==> (|u|) / (||u||) <= lambda / sqrt(1/2 (1 + lambda^2)) = sqrt(lambda^2 / (1/2 (1 + lambda^2))) = sqrt((2 lambda^2) / (1 + lambda^2)) =: sqrt(rho)
 $
 
-== Was bedeutet $(|v|) / (||v||)$?
 
-$
-lambda := (|v|) / (||v||) in [0, 1]
-$
-
-*Intuition:* $lambda$ ist der Anteil der Energie von $v$, der *auch auf dem groben Gitter* noch erkennbar ist.
-
-#grid(
-	columns: 2,
-	column-gutter: 1.5em,
-	[
-		#align(center)[$lambda -> 0$]
-		$v$ oszilliert fein, ist auf $Omega_H$ kaum sichtbar (fast eine $T_h$-Funktion)
-	],
-	[
-		#align(center)[$lambda -> 1$]
-		$v$ sieht auf grob und fein fast gleich aus (fast eine $S_H$-Funktion)
-	],
-)
-
-#align(center)[
-	#cetz.canvas({
-		import cetz.draw: *
-		line((0, 0), (8, 0), mark: (end: ">"))
-		for (x, l) in ((0, $0$), (4, $0.5$), (8, $1$)) {
-			line((x, -0.1), (x, 0.1))
-			content((x, -0.4), l)
-		}
-		content((0, 0.4), $lambda$, anchor: "south-west")
-		content((-0.3, 0), [fein], anchor: "east")
-		content((8.3, 0), [grob], anchor: "west")
-	})
-]
-
-
-== $rho$ als Maß für die Trennschärfe
+== $rho$ als Konvergenzparameter
 
 $
 rho := (2 lambda^2) / (1 + lambda^2)
@@ -446,7 +433,7 @@ $
  ||G_h^"II" u|| <= |u|.
 $
 
-#hi[Intuition: ein Gauß-Seidel-Halbschritt kann die Energienorm nicht über die Seminorm hinaus erhöhen — der Schritt "glättet" mindestens so viel, wie auf dem groben Gitter ohnehin schon an Energie steckt.]
+#hi[Intuition: Wenn die feinen Punkte bereits geglättet sind, reicht eine Glättung der groben Punkte um die Energienorm auf die Seminorm zu senken.]
 
 
 
