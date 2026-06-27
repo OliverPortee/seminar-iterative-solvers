@@ -17,145 +17,9 @@
 	body
 )
 
-#let fine-color = lq.color.map.petroff10.at(0)
-#let coarse-color = lq.color.map.petroff10.at(1)
-
 #let Gbox(content, color) = box(fill: color.transparentize(70%), inset: (top: 7pt, bottom: 4pt, left: 3pt, right: 2pt), radius: 5pt, stroke: color, baseline: 15%, content)
 #let G1(content) = Gbox(content, fine-color)
 #let G2(content) = Gbox(content, coarse-color)
-
-#let W = 6
-#let H = 4
-
-#let grid-point(x, y) = {
-	let fill = if even(x + y) {
-		coarse-color
-	} else {
-		fine-color
-	}
-	cetz.draw.circle((x, y), fill: fill, stroke: none, radius: 4pt)
-}
-
-
-#let draw-coarse-grid() = {
-	import cetz.draw: line
-	for x in range(0, W + 1, step: 2) {
-		line((x, 0), (x, H))
-	}
-	for y in range(0, H + 1, step: 2) {
-		line((0, y), (W, y))
-	}
-	for x in range(W) {
-		for y in range(H) {
-			if odd(x + y) {
-				line((x + 1, y), (x, y + 1))
-			} else {
-				line((x, y), (x + 1, y + 1))
-			}
-		}
-	}
-	for x in range(0, W + 1, step: 2) {
-		for y in range(0, H + 1, step: 2) {
-			grid-point(x, y)
-		}
-	}
-	for x in range(1, W + 1, step: 2) {
-		for y in range(1, H + 1, step: 2) {
-			grid-point(x, y)
-		}
-	}
-}
-
-#let draw-2h-grid() = {
-	import cetz.draw: line
-	for x in range(0, W + 1, step: 2) {
-		line((x, 0), (x, H))
-	}
-	for y in range(0, H + 1, step: 2) {
-		line((0, y), (W, y))
-	}
-	for x in range(0, W, step: 2) {
-		for y in range(0, H, step: 2) {
-			if odd(int(x / 2) + int(y / 2)) {
-				line((x + 2, y), (x, y + 2))
-			} else {
-				line((x, y), (x + 2, y + 2))
-			}
-		}
-	}
-	for x in range(0, W + 1, step: 2) {
-		for y in range(0, H + 1, step: 2) {
-			grid-point(x, y)
-		}
-	}
-}
-
-#let draw-th-grid() = {
-	import cetz.draw: line
-
-	for x in range(W + 1) {
-		line((x, 0), (x, H))
-	}
-	for y in range(H + 1) {
-		line((0, y), (W, y))
-	}
-	for x in range(W) {
-		for y in range(H) {
-			if odd(x + y) {
-				line((x + 1, y), (x, y + 1))
-			} else {
-				line((x, y), (x + 1, y + 1))
-			}
-		}
-	}
-	for x in range(W + 1) {
-		for y in range(H + 1) {
-			if odd(x + y) {
-				grid-point(x, y)
-			}
-		}
-	}
-}
-
-#let draw-grid(show-th: false) = {
-	import cetz.draw: line
-
-	if show-th {
-		let color = navy
-		for x in range(1, W) {
-			for y in range(1, H) {
-				if odd(x + y) {
-					line((x, y), (x + 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: -45deg), stroke: none)
-					line((x, y), (x + 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 45deg), stroke: none)
-					line((x, y), (x - 1, y), (x, y - 1), close: true, fill: gradient.linear(color, white, white, angle: 135deg), stroke: none)
-					line((x, y), (x - 1, y), (x, y + 1), close: true, fill: gradient.linear(color, white, white, angle: 225deg), stroke: none)
-				}
-			}
-		}
-	}
-	
-	for x in range(W + 1) {
-		line((x, 0), (x, H))
-	}
-	for y in range(H + 1) {
-		line((0, y), (W, y))
-	}
-	for x in range(W) {
-		for y in range(H) {
-			if odd(x + y) {
-				line((x + 1, y), (x, y + 1))
-			} else {
-				line((x, y), (x + 1, y + 1))
-			}
-		}
-	}
-	for x in range(W + 1) {
-		for y in range(H + 1) {
-			grid-point(x, y)
-		}
-	}
-}
-
 
 = Setup
 
@@ -226,8 +90,9 @@ The basis functions of $T_h$ form pyramid-like patterns. As a result, all functi
 		cetz.draw.scale(0.8)
 		draw-grid(show-th: true)
 	}),
-	caption: [Each shaded are corresponds to one of the basis functions of $T_h$. The supports of the respective basis functions are disjoint (they do not overlap each other).]
+	caption: [Each shaded area corresponds to one of the basis functions of $T_h$. The supports of the respective basis functions are disjoint (they do not overlap each other).]
 )
+
 = Norms
 
 For $u, v in S_h$, we define the bilinear form
@@ -350,17 +215,17 @@ Since $v$ is linear in both $"I" = triangle 1 2 4$ and in $"II" = triangle 4 2 3
 
 For $C$ we find
 $
-sum_nu C_nu = sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
+sum_nu C_nu = sum_vec(i\, j in Omega_(2h), d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
 $
 
 We can also show that
 $
-sum_nu D_nu >= sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
+sum_nu D_nu >= sum_vec(i\, j in Omega_(2h) without Omega_H, d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2
 $
 
 Together with $C$, we get
 $
-sum_nu C_nu + D_nu &>= sum_vec(i\, j "green", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
+sum_nu C_nu + D_nu &>= sum_vec(i\, j in Omega_(2h), d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= 1/2 sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2 \
 &= 1/2 |v|^2
@@ -497,7 +362,7 @@ $
 cos^2 alpha = 1 - sin^2 alpha <= 1/2 (1 - lambda^2) wide ==> wide sin^2 alpha >= 1/2 (1 + lambda^2).
 $
 Furthermore, we observe that for a fixed $v$ and a fixed $alpha$, $u$ is the shortest when $u perp w$. In this case, $sin(alpha) = (||u||) / (||v||)$. Generally, $||u|| >= ||v|| sin(alpha)$.
-Since $u$ and $v$ have the same values on the green and red points, we know that $|u| = |v|$.
+Since $u$ and $v$ have the same values on the coarse points, we know that $|u| = |v|$.
 $
 |u| = |v| = lambda||v|| <= lambda / sin(alpha)||u|| <= lambda / (sqrt(1/2 (1 + lambda^2)))||u||
 $
@@ -550,15 +415,15 @@ cetz.canvas({
 	line(p4, p8)
 	line(p2, p6)
 	line(p2, p4, p6, p8, close: true)
-	d(p1, black)
-	d(p2, olive)
-	d(p3, black)
-	d(p4, red)
-	d(p5, black)
-	d(p6, olive)
-	d(p7, black)
-	d(p8, red)
-	d(p0, black)
+	d(p1, blue)
+	d(p2, yellow)
+	d(p3, blue)
+	d(p4, yellow)
+	d(p5, blue)
+	d(p6, yellow)
+	d(p7, blue)
+	d(p8, yellow)
+	d(p0, blue)
 	point-labels()
 	content(p0, $0$, anchor: "north-west", padding: 0.05)
 	
@@ -570,15 +435,15 @@ cetz.canvas({
 	line(p1, p5)
 	line(p4, p8)
 	line(p2, p6)
-	d(p1, olive)
-	d(p2, black)
-	d(p3, olive)
-	d(p4, black)
-	d(p5, olive)
-	d(p6, black)
-	d(p7, olive)
-	d(p8, black)
-	d(p0, red)
+	d(p1, yellow)
+	d(p2, blue)
+	d(p3, yellow)
+	d(p4, blue)
+	d(p5, yellow)
+	d(p6, blue)
+	d(p7, yellow)
+	d(p8, blue)
+	d(p0, yellow)
 	point-labels()
 	content((0.27, 0.37), $0$, anchor: "north-west", padding: 0.05)
 }),
@@ -594,9 +459,9 @@ where $b_i = integral_Omega f phi_i$ is the right-hand side. In the following se
 
 We split the Gauss-Seidel relaxation into two steps ($eq.est$ red-black Gauss-Seidel). First, we will smooth the fine points ($in Omega_h without Omega_H$), then the coarse points ($in Omega_H$). Formally,
 $
-(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H &wide& , 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H &wide& 
+(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H wide ("yellow") &wide& , 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h without Omega_H wide ("blue") 
 ) \
-(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& , u_i &wide& p_i in Omega_h \\ Omega_H &wide& )
+(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H wide("yellow") &wide& , u_i &wide& p_i in Omega_h without Omega_H wide ("blue") )
 $
 
 Here, $N(i)$ is the set of neighboring points with distance h to $p_i$.
@@ -640,15 +505,15 @@ Let $macron(u) := G_h^"II" u$, and fix a point $p_0 in Omega_H$ with its four ne
 		line(p1, p5)
 		line(p4, p8)
 		line(p2, p6)
-		d(p1, olive)
-		d(p2, black)
-		d(p3, olive)
-		d(p4, black)
-		d(p5, olive)
-		d(p6, black)
-		d(p7, olive)
-		d(p8, black)
-		d(p0, red)
+		d(p1, yellow)
+		d(p2, blue)
+		d(p3, yellow)
+		d(p4, blue)
+		d(p5, yellow)
+		d(p6, blue)
+		d(p7, yellow)
+		d(p8, blue)
+		d(p0, yellow)
 		content(p2, $1$, anchor: "north-west", padding: 0.05)
 		content(p4, $2$, anchor: "north-west", padding: 0.05)
 		content(p6, $3$, anchor: "south-east", padding: 0.05)

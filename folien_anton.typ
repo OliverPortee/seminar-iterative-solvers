@@ -5,70 +5,19 @@
 #import calc: even, odd
 #import themes.simple: *
 
-#import "lib.typ": h-grid, W, H
+#import "lib.typ": W, H, draw-grid, draw-coarse-grid, draw-2h-grid, draw-th-grid, fine-color, coarse-color
 
 #show: simple-theme
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
-
-#let fine-color = lq.color.map.petroff10.at(0)
-#let coarse-color = lq.color.map.petroff10.at(1)
 
 #let Gbox(content, color) = box(fill: color.transparentize(70%), inset: (top: 7pt, bottom: 4pt, left: 3pt, right: 2pt), radius: 5pt, stroke: color, baseline: 15%, content)
 #let G1(content) = Gbox(content, fine-color)
 #let G2(content) = Gbox(content, coarse-color)
 
 // einfarbige Gitter wie im Handout (statt der bunten lib.typ-Gitter)
-// single-color-grid/seminorm-grid/coarse-diag-real liegen zentral in
-// triangulation-single-color.typ
-#import "triangulation-single-color.typ": all-blue, checkerboard, coarse-grid, single-color-grid, coarse-diag-real, seminorm-grid
-
-// Zerlegung u = v + w wie im Handout (schwarz/schraffiert statt bunt)
-#let decomp-fine-edges() = {
-	import cetz.draw: line
-	for y in range(H + 1) { line((0, y), (W, y), stroke: black) }
-	for x in range(W + 1) { line((x, 0), (x, H), stroke: black) }
-	for x in range(W) {
-		for y in range(H) {
-			if calc.even(x + y) { line((x, y), (x + 1, y + 1), stroke: black) }
-			else { line((x + 1, y), (x, y + 1), stroke: black) }
-		}
-	}
-}
-
-#let decomp-coarse-edges() = {
-	import cetz.draw: line
-	for y in range(0, H + 1, step: 2) { line((0, y), (W, y), stroke: black) }
-	for x in range(0, W + 1, step: 2) { line((x, 0), (x, H), stroke: black) }
-	for x in range(W) {
-		for y in range(H) {
-			if calc.even(x + y) { line((x, y), (x + 1, y + 1), stroke: black) }
-			else { line((x + 1, y), (x, y + 1), stroke: black) }
-		}
-	}
-}
-
-#let decomp-hatch = tiling(size: (6pt, 6pt))[
-	#place(line(start: (0%, 0%), end: (100%, 100%), stroke: 0.6pt))
-]
-
-#let decomp-points(mode) = {
-	import cetz.draw: circle
-	for x in range(W + 1) {
-		for y in range(H + 1) {
-			let on-SH = calc.even(x + y)
-			if mode == "u" {
-				if on-SH { circle((x, y), radius: 4pt, fill: black, stroke: none) }
-				else { circle((x, y), radius: 4pt, fill: decomp-hatch, stroke: black + 0.4pt) }
-			} else if mode == "v" {
-				if on-SH { circle((x, y), radius: 4pt, fill: black, stroke: none) }
-			} else if mode == "w" {
-				if on-SH { circle((x, y), radius: 4pt, fill: none, stroke: black + 0.4pt) }
-				else { circle((x, y), radius: 4pt, fill: black, stroke: none) }
-			}
-		}
-	}
-}
+// single-color-grid/seminorm-grid liegen zentral in triangulation-single-color.typ
+#import "triangulation-single-color.typ": all-blue, single-color-grid, seminorm-grid
 
 #title-slide[
 #v(1fr)
@@ -112,16 +61,14 @@ $
 
 #figure(
 	cetz.canvas({
-		import cetz.draw: *
+		import cetz.draw: content, translate, scale
 		scale(1)
-		single-color-grid(all-blue)
-		content((W / 2, -1), $Omega_h$)
+		draw-grid()
 		translate(x: W + 2)
-		single-color-grid(checkerboard, real-axis: c => calc.even(c))
-		content((W / 2, -1), $Omega_H$)
+		draw-coarse-grid()
 		translate(x: W + 2)
-		single-color-grid(coarse-grid, real-axis: c => calc.even(c), real-diag: coarse-diag-real)
-		content((W / 2, -1), $Omega_(2h)$)
+		draw-2h-grid()
+
 	})
 )
 
@@ -156,6 +103,26 @@ $
 $
 S_h &= S_H plus.o T_h wide wide wide  u = v+w
 $
+
+== Finite-Elemente-Raum
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: content, translate, scale
+		scale(1.2)
+		draw-grid()
+		content((7, 2), $=$)
+		content((W / 2, -0.5), $u in S_h$)
+		translate(x: 8)
+		draw-coarse-grid()
+		content((7, 2), $plus.o$)
+		content((W / 2, -0.5), $v in S_H$)
+		translate(x: 8)
+		draw-th-grid()
+		content((W / 2, -0.5), $w in T_h$)
+	}),
+	caption: [$S_h$ (fein) zerfällt in $S_H$ (grob, gelb) und $T_h$ (blau, nur dazwischen).]
+)
 
 
 = Energienorm
@@ -276,11 +243,11 @@ $
 			line(p4, p2)
 
 			let r = 2pt
-			circle(p1, radius: r, stroke: none, fill: red)
-			circle(p2, radius: r, stroke: none, fill: olive)
-			circle(p3, radius: r, stroke: none, fill: red)
-			circle(p4, radius: r, stroke: none, fill: olive)
-			circle(p5, radius: r, stroke: none, fill: black)
+			circle(p1, radius: r, stroke: none, fill: yellow)
+			circle(p2, radius: r, stroke: none, fill: yellow)
+			circle(p3, radius: r, stroke: none, fill: yellow)
+			circle(p4, radius: r, stroke: none, fill: yellow)
+			circle(p5, radius: r, stroke: none, fill: blue)
 
 			content(p1, $1$, anchor: "east", padding: 0.25)
 			content(p3, $3$, anchor: "east", padding: 0.25)
@@ -455,17 +422,17 @@ $
 	circle(p2, radius: 5pt, fill: fine-color, stroke: black)
 	circle(p3, radius: 5pt, fill: fine-color, stroke: black)
 	circle(p4, radius: 5pt, fill: fine-color, stroke: black)
-	content(p0, $0$, anchor: "south", padding: 0.18)
-	content(p1, $1$, anchor: "north", padding: 0.12)
-	content(p2, $2$, anchor: "west", padding: 0.12)
-	content(p3, $3$, anchor: "south", padding: 0.12)
-	content(p4, $4$, anchor: "east", padding: 0.12)
+	content(p0, $0$, anchor: "south", padding: 0.2)
+	content(p1, $1$, anchor: "east", padding: 0.3)
+	content(p2, $2$, anchor: "west", padding: 0.3)
+	content(p3, $3$, anchor: "west", padding: 0.3)
+	content(p4, $4$, anchor: "east", padding: 0.3)
 })
 
 == Schritt 1: Lokale Identität
 
 #grid(
-	columns: (auto, 1fr),
+	columns: (50%, 1fr),
 	align: horizon,
 	column-gutter: 1.5em,
 	figure(diamond-fig()),
