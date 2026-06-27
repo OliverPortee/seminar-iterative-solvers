@@ -244,7 +244,7 @@ The multigrid algorithm consists of the presmoother, the coarse grid correction 
 			smoother-labels: true,
 		)
 	}),
-	caption: [Schematic representation of the multigrid algorithm for $r = 4$.]
+	caption: [Schematic representation of the multigrid algorithm for $r = 4$.#footnote[In the first iteration, we prepend $G^(r + 1)$ to the presmoother.]]
 )
 
 The individual steps in the smoothers are the Gauss-Seidel half-steps.
@@ -264,7 +264,7 @@ $
 The only exception is iteration 1 (i.e., the first V-cycle or W-cycle) where we prepend the half-step $G^(r + 1)$ to achieve symmetry between presmoother and postsmoother. The postsmoother contains $r + 1$ half-steps,
 $
 u^(2 r + 2) = G^1 G^2 ... G^r G^(r + 1) u^(r + 1) = tilde(G)^* u^(r + 1)
-$
+$ <eq:Gstar>
 
 Since we only want to examine convergence, we assume the homogeneous Laplace equation,
 $
@@ -498,7 +498,7 @@ $
 (P x, y) = (P x_1 + cancel(P x_2), y) = (x_1, y) = (x_1, y_1 + y_2) \
 = (x_1, y_1) + cancel((x_1, y_2)) = (x_1, y_1) = (x_1, y_1) + cancel((x_2, y_1)) \
 = (x_1 + x_2, y_1) = (x, y_1) = (x, P y_1 + cancel(P y_2)) = (x, P y).
-$
+$ <eq:orthogonal-projections-self-adjoint>
 The inner products $(x_1, y_2)$ and $(x_2, y_1)$ are zero because one of the arguments is in $T_h$ and the other in $T_h^perp$ (so they are orthogonal to each other).
 
 Another property of orthogonal projections is that they are idempotent:
@@ -520,7 +520,7 @@ $ <eq:ineffective-1>
 Cauchy-Schwarz inequality:
 $
 |(u, v)| <= ||u|| dot ||v|| wide forall u, v
-$
+$ <eq:cauchy-schwarz>
 The case of equality happens when $u$ and $v$ are linearly dependent,
 $
 |(u, v)| = ||u|| dot ||v|| wide <==> wide u = alpha v wide alpha in RR.
@@ -562,7 +562,7 @@ Note that the exact coarse grid correction is similar to the Gauss-Seidel half s
 $
 u^(q - 1) = P_(S_H) u^r \
 u' = u^r - u^(q - 1) = I u^r - P_(S_H) u^r = (I - P_(S_H)) u^r = P_(S_H^perp) u^r.
-$
+$ <eq:exact-cgc>
 
 Furthermore, as observed earlier already, the last step of the presmoother is always $G_h^"I"$. The resulting vector $u^r$ is thus orthogonal to $T_h$ (compare vector $v$ in @fig:G1).
 
@@ -618,7 +618,7 @@ This idea can be generalized to higher-dimensional function spaces for the follo
 This equation gives us an upper bound for the norm reduction achieved by an exact coarse grid correction. Together with @eq:presmoother-convergence, we find
 $
 ||u'|| &<= rho^(r / 2) sqrt((1 - rho) / (2 - rho)) ||u^0||
-$
+$ <eq:exact-cgc-convergence>
 to account for both the presmoother and the exact coarse grid correction.
 
 #{
@@ -665,6 +665,216 @@ Plotting the norm reduction of the presmoother and the exact coarse grid correct
 
 = Non-Exact Coarse Grid Correction <sec:non-exact-cgc>
 
+Now we generalize the coarse grid correction to include an error. Instead of evaluating $u^(q - 1)$ exactly, we compute an approximation $v_1$ to $u^(q - 1)$. Assuming that we already know the convergence rate $delta_(q - 1)$ on the coarser level $q - 1$, and that perform a V-cycle with one recursive multigrid call, we find that the deviation from the exact error, $u^(q - 1)$ can be bounded:
+$
+||v_1 - u^(q - 1)|| <= delta_(q - 1) ||u^(q - 1)||.
+$
+To generalize this, we define
+$
+delta := cases(0 &wide& q = 1, (delta_(q - 1))^mu &wide& q > 1) wide wide wide mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
+$
+and require that
+$
+||v_1 - u^(q - 1)|| <= delta ||u^(q - 1)||.
+$ <eq:step-3-generalization>
+Remember that $u^(r + 1)$ is the actual approximation after the coarse grid correction whereas $u'$ is the approximation if the coarse grid correction had been exact.
+Thus the deviation is,
+$
+u^(r + 1) - u' = (u^r - v_1) - (u^r - u^(q - 1)) = u^(q - 1) - v_1.
+$
+If we define
+$
+v_2 := 1/delta (u^(q - 1) - v_1) = 1/delta (u^(r + 1) - u') wide wide v_2in S_H
+$ <eq:v2>
+then (from @eq:step-3-generalization):
+$
+||u^(r + 1) - u'|| = ||u^(q - 1) - v_1|| = delta ||v_2|| <= delta ||u^(q - 1)|| \
+==> ||v_2|| <= ||u^(q - 1)||.
+$ <eq:length-v2>
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: *
+
+		scale(0.8)
+		
+		line((-3, 0), (8, 0))
+
+		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (1.5, 0), stroke: 3pt, mark: (end: ">"))
+
+		line((6, 6), (7.5, 6), stroke: (dash: "dashed"))
+		line((6, 0), (7.5, 6), stroke: 2pt, mark: (end: ">"))
+		line((1.5, 0), (7.5, 6), stroke: (dash: "dashed"))
+
+		content((3, 3), $u^r$, anchor: "south-east")
+		content((6, 0), $u^(q - 1)$, anchor: "north", padding: 0.3)
+		content((0, 0), $0$, anchor: "north", padding: 0.2)
+		content((6, 3), $u'$, anchor: "east", padding: 0.1)
+		content((6.75, 3), $u^(r + 1)$, anchor: "west", padding: 0.2)
+		content((8, 0), $S_H$, anchor: "west", padding: 0.2)
+		content((1.5, 0), $delta v_2$, anchor: "north", padding: 0.2)
+
+		right-angle((6, 0), start: 90deg)
+
+		let h = -1.1
+		let o = 0.15
+		line((1.5, h), (6, h))
+		line((1.5, h + o), (1.5, h - o))
+		line((6, h + o), (6, h - o))
+		content((3.75, h), $||v_1||$, anchor: "north", padding: 0.1)
+	}),
+	caption: [Visualization of the non-exact coarse grid correction.]
+) <fig:non-exact-cgc>
+
 = Full Multigrid Iteration <sec:full-mg>
 
+To account for a full multigrid iteration, we need to include the presmoother, non-exact coarse grid correction and the postsmoother. First, let us analyze the algorithm across the first two iterations.
 
+#figure(
+	table(
+		columns: 7,
+		align: (right + horizon,) + (center + horizon,) * 6,
+		stroke: none,
+		[Iteration], table.vline(stroke: 2pt), table.cell(colspan: 3)[1], table.vline(stroke: 2pt), table.cell(colspan: 3)[2],
+		table.hline(stroke: 2pt),
+		[Step], [presmoother], [CGC], [postsmoother], [presmoother], [CGC], [postsmoother],
+		table.hline(),
+		[], $G^(r + 1) G^r ... G^1$, [], $G^1 ... G^r G^(r + 1)$, $G^r ... G^1$, [], $G^1...G^r G^(r + 1)$,
+		table.hline(),
+		[Example \ $r = 3$], $G2(G^4) G1(G^3) G2(G^2) G1(G^1)$, [], $G1(G^1) G2(G^2) G1(G^3) G2(G^4)$, $G1(G^3) G2(G^2) G1(G^1)$, [], $G1(G^1) G2(G^2) G1(G^3) G2(G^4)$,
+	),
+	caption: [First two iterations of the multigrid algorithm. \ The coarse grid correction is abbreviated as CGC.]
+) <tab:no-duplicate>
+
+Note that in the first iteration, we have an addition $G^(r + 1)$ at the beginning of the presmoother. This half-step is missing in all subsequent iterations. If we were to include $G^(r + 1)$ at the beginning of the presmoother of each iteration, we would have a duplicate. For example for $r = 3$ the postsmoother of iteration 1 would end with $G_h^"II"$ and the presmoother of iteration 2 would start with $G_h^"II"$ again. However, since the Gauss-Seidel half-steps are idempotent (as they are projections), we have $G_h^"II" dot G_h^"II" = G_h^"II"$. The additional half-step in the presmoother would not have any effect.
+
+However, for the same reason, it is possible to include $G^(r + 1)$ conceptionally at the beginning of each presmoother. Mathematically, this is the same algorithm as in @tab:no-duplicate. This has the benefit that now the postsmoother is the reverse of the presmoother, such that
+$
+tilde(G) &= G^(r + 1) G^r ... G^1 &wide& "presmoother" \
+tilde(G)^* &= G^1 ... G^r G^(r + 1) &wide& "postsmoother".
+$ <eq:presmoother-postsmoother>
+As suggested by the notation, $tilde(G)^*$ is the adjoint of $tilde(G)$:
+
+$
+(tilde(G) u, v) &= (G^(r + 1) G^r ... G^1 u, v) \
+&= (G^r G^(r - 1) ... G^1 u, G^(r + 1) v) \
+&= (G^(r - 1) ... G^1 u, G^r G^(r + 1) v) \
+&= ... = (u, G^1 G^2 ... G^r G^(r + 1) v) \
+&= (u, tilde(G)^* v).
+$ <eq:G-adjoint>
+This is true because all Gauss-Seidel half-steps $G^k$ are self-adjoint as shown in @sec:presmoother.
+
+Now, we are ready to take the final steps to get the convergence rate. To this end, we use the following idea: We want to get an expression for $||u^(2 r + 2)||$. This term can be expressed as follows:
+$
+max_(hat(u) in S_h) {((hat(u), u^(2 r + 2))) / (||hat(u)||)} = max_(hat(u) in S_h) {(hat(u) / (||hat(u)||), u^(2 r + 2))} = ||u^(2 r + 2)||.
+$ <eq:duality-start>
+This is because (due to the Cauchy-Schwarz inequality, @eq:cauchy-schwarz)
+$
+(hat(u) / (||hat(u)||), u^(2 r + 2)) <= lr(||hat(u) / (||hat(u)||)||) dot ||u^(2 r + 2)|| = ||u^(2 r + 2)||.
+$ <eq:duality>
+Subsequently, we will find the upper bound
+$
+(hat(u) / (||hat(u)||), u^(2 r + 2)) <= delta_q ||u^0|| wide forall hat(u) in S_h.
+$
+Since this upper bound must be valid for all possible $hat(u)$, it must be valid vor $hat(u) = u^(2 r + 2)$ as well (when we have an equality in @eq:duality). In this special case, we find
+$
+(u^(2 r + 2) / (||u^(2 r + 2)||), u^(2 r + 2)) = ||u^(2 r + 2)|| <= delta_q ||u^0||.
+$ <eq:duality-end>
+To evaluate $delta_q$, we start with the inner product $(hat(u), u^(2 r + 2))$.
+
+$
+(hat(u), u^(2 r + 2)) &= (hat(u), tilde(G)^* u^(r + 1)) &wide& #ref(<eq:Gstar>) \
+&= (tilde(G) hat(u), u^(r + 1)) &wide& #ref(<eq:G-adjoint>) \
+&= (tilde(G) hat(u), u' + delta v_2) &wide& #ref(<eq:v2>) \
+&= (tilde(G) hat(u), u' - delta u' + delta u' + delta v_2) \
+&= (tilde(G) hat(u), (1 - delta) Q u^r + delta (u' + v_2)).
+$
+Here, $Q := P_(S_H)^perp$ represents the exact coarse grid correction (see @eq:exact-cgc). Since it is a projection, it is idempotent ($Q^2 = Q$).
+$
+(hat(u), u^(2 r + 2)) &<= (1 - delta) (tilde(G) hat(u), Q u^r) + delta (tilde(G) hat(u), u' + v_2) &wide& "linearity of inner product" \
+&= (1 - delta) (tilde(G) hat(u), Q tilde(G) u^0) + delta (tilde(G) hat(u), u' + v_2) &wide& #ref(<eq:presmoother-postsmoother>) \
+&<= (1 - delta) (tilde(G) hat(u), Q^2 tilde(G) u^0) + delta ||tilde(G) hat(u)|| ||u' + v_2|| &wide& #ref(<eq:cauchy-schwarz>).
+$
+For the term $||u' + v_2||$ we find (see @fig:non-exact-cgc and @eq:length-v2)
+$
+||u' + v_2||^2 = ||u'||^2 + ||v_2||^2 <= ||u'||^2 + ||u^(q - 1)||^2 = ||u^r||^2
+$
+and thus
+$
+||u' + v_2|| <= ||u^r||.
+$
+$
+(hat(u), u^(2 r + 2)) &<= (1 - delta) (Q tilde(G) hat(u), Q tilde(G) u^0) + delta ||tilde(G) hat(u)|| ||u^r|| &wide& #ref(<eq:orthogonal-projections-self-adjoint>) \
+&<= (1 - delta) ||Q tilde(G) hat(u)|| ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| ||tilde(G) u^0|| &wide& #ref(<eq:cauchy-schwarz>).
+$
+
+We rearrange this term as follows. If
+$
+a &:= sqrt(1 - delta) ||Q tilde(G) hat(u)||, &wide& c := sqrt(1 - delta) ||Q tilde(G) u^0||, \
+b &:= sqrt(delta) ||tilde(G) hat(u)||, &wide& d := sqrt(delta) ||tilde(G) u^0||,
+$
+then
+$
+(1 - delta) ||Q tilde(G) hat(u)|| ||Q tilde(G) u^0|| + delta ||tilde(G) hat(u)|| ||tilde(G) u^0|| = a c + b d = vec(a, b) dot vec(c, d) \
+<= lr(||vec(a, b)||) dot lr(||vec(c, d)||) = sqrt(a^2 + b^2) dot sqrt(c^2 + d^2) \
+= sqrt((1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2) dot sqrt((1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2).
+$ <eq:sqrt-terms>
+Let us focus on the term $(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2$. From @eq:exact-cgc-convergence and @eq:presmoother-convergence, we find
+$
+(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2 &= (1 - delta) ||u'||^2 + delta ||u^r||^2 \
+&<= (1 - delta) (rho^(r/2) sqrt((1 - rho) / (2 - rho)) ||u^0||)^2 + delta (rho^(r/2) ||u^0||)^2 \
+&= (1 - delta) rho^r (1 - rho) / (2 - rho) ||u^0||^2 + delta rho^r ||u^0||^2 \
+&= rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta) ||u^0||^2.
+$ <eq:rho-u0>
+Similarly, for the other square root in @eq:sqrt-terms, we have
+$
+(1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2 <= rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta) ||hat(u)||^2.
+$ <eq:rho-hatu>
+
+However, $rho$ depends on the starting vector (previously called $u^0$). When we have different starting vectors, $u^0$ and $hat(u)$, the corresponding $rho$ will be different (i.e. the value of $rho$ in @eq:rho-u0 may be different than in @eq:rho-hatu). Furthermore, we cannot evaluate the exact value of $rho$ since we can start with an arbitrary start vector $u^0$. To overcome this problem, we assume the worst case, i.e., the maximum of the function $rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)$.
+
+To do so, we find that $0 <= rho <= 1$. This is because
+$
+0 <= lambda := (|v^r|) / (||v^r||) <= 1 wide "and" wide rho := (2 lambda^2) / (lambda^2 + 1).
+$
+
+
+#figure({
+	let xs = lq.linspace(0, 3, num: 200)
+	lq.diagram(
+		xaxis: (
+			label: $lambda$,
+		),
+		yaxis: (
+			label: $rho$,
+		),
+		lq.plot(
+			xs,
+			x => 2 * x * x / (x * x + 1),
+			mark: none,
+		)
+	)
+}, caption: [$rho$ as a function of $lambda$.])
+
+We define
+$
+delta_q := max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)].
+$
+Then
+$
+(1 - delta) ||Q tilde(G) u^0||^2 + delta ||tilde(G) u^0||^2 &<= delta_q ||u^0||^2 \
+(1 - delta) ||Q tilde(G) hat(u)||^2 + delta ||tilde(G) hat(u)||^2 &<= delta_q ||hat(u)||^2.
+$
+We substitute this inequality back into @eq:sqrt-terms:
+$
+(hat(u), u^(2 r + 2)) &<= sqrt(delta_q ||hat(u)||^2) dot sqrt(delta_q ||u^0||^2) \
+&= delta_q ||hat(u)|| ||u^0|| wide wide forall hat(u) in S_h.
+$
+Using the arguments from @eq:duality-start to @eq:duality-end, we find that
+$
+||u^(2 r + 2)|| <= delta_q ||u^0|| wide "with" wide delta_q := max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)].
+$
+$delta_q$ is an upper bound for the norm reduction of a single multigrid iteration on level $q$. This equation can now be applied for both a two-grid method and a general multigrid method to get concrete numerical values for $delta_q$.

@@ -912,16 +912,13 @@ $
 == Nicht-Exakte Grobgitterkorrektur
 
 $
-||u^(r + 1) - u'|| = ||(u^r + v_1) - (u^r + u^(q - 1))|| = ||v_1 - u^(q - 1)|| \
-$
-laut Annahme:
-$
-||underbrace(v_1 - u^(q - 1), =: delta v_2)|| <= delta ||u^(q - 1)|| \
-$
-$
-v_1 - u^(q - 1) = u^(r + 1) - u' =: delta v_2 wide "mit" wide ||v_2|| <= ||u^(q - 1)||
+u^(r + 1) - u' = (u^r - v_1) - (u^r - u^(q - 1)) = u^(q - 1) - v_1 =: delta v_2
 $
 
+laut Annahme:
+$
+||u^(q - 1) - v_1|| = delta ||v_2|| <= delta ||u^(q - 1)||
+$
 
 == Nicht-Exakte Grobgitterkorrektur
 
@@ -951,6 +948,8 @@ $
 			content((8, 0), $S_H$, anchor: "west", padding: 0.2)
 			content((1.5, 0), $delta v_2$, anchor: "north", padding: 0.2)
 		})
+
+		right-angle((6, 0), start: 90deg)
 	})
 )
 
