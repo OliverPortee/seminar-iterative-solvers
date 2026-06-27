@@ -720,7 +720,6 @@ $
 
 #let picture = cetz.canvas({
 		import cetz.draw: *
-
 		
 		scale(1.5)
 		line((0, 0), (-4, 5), mark: (end: ">"), stroke: 2pt)

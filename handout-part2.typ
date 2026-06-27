@@ -412,7 +412,7 @@ This is exactly what $G_h^"I"$ computes at each blue grid point, minimizing the 
 Now we define $v := G_h^"I" u$. Since $v$ is the minimizer of $J(u + w) quad forall w in T_h$, we can state that
 $
 J(v + w) >= J(v) wide forall w in T_h,
-$
+$ <eq:orthogonal-1>
 or alternatively,
 $
 lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 0 wide forall w in T_h, epsilon in RR.
@@ -429,7 +429,7 @@ $
 For $epsilon = 0$, we get
 $
 lr(dv(, epsilon) J(v + epsilon w)|)_(epsilon = 0) = 2 a(v, w) =^! 0 wide forall w in T_h.
-$
+$ <eq:orthogonal-2>
 Since $a(dot, dot)$ has the role of the inner product, we find that $v$ is perpendicular to $T_h$. If $T_h^perp := {u in S_h | (u, w) = 0 quad forall w in T_h}$ is the orthogonal complement of $T_h$, then $v in T_h^perp$.
 
 Let $P_(T_h)$ and $P_(T_h^perp)$ denote the orthogonal projections onto $T_h$ and $T_h^perp$, respectively. $G_h^"I"$ only changes degrees of freedom that are part of $T_h$. Thus,
@@ -466,7 +466,7 @@ This idea can also be visualized using a two-dimensional $S_h$ and one-dimension
 		line((3, 3), (6, 0), mark: (end: ">"), stroke: 2pt)
 	}),
 	caption: [Visualization of the operator $G_h^"I" = P_(T_h^perp)$.]
-)
+) <fig:G1>
 
 Since $T_h plus.o T_h^perp = S_h$, we can find a $w in T_h$ such that $u - w = v$. Since $v perp w space forall w in T_h$, it follows that $w = P_(T_h) u$.
 
@@ -530,18 +530,138 @@ Rearranging @eq:ineffective-1, we get
 $
 "if" u = G_h^"II": wide (||G_h^"I" u||) / (||u||) <= (||G_h^"II" G_h^"I" u||) / (||G_h^"I" u||).
 $
-Similarly, this can be shown the other way around (when we swap $G_h^"I"$ and $G_h^"II"$). All in all, this means that the Gauss-Seidel steps become more ineffective over time (or in case of equality the convergence rate stays the same).
-
-Let us apply this finding to the presmoother. Note that the last step of the presmoother is always $G_h^"I"$, i.e., $u^r = G_h^"I" u^(r - 1)$. If we were to append another Gauss-Seidel step, we would have $u^(r + 1) = G_h^"II" u^r$. We know from @eq:G2-convergence that this step would have a norm reduction of $sqrt(rho)$ or less (the lower the better). During the presmoother we have an alternating sequence of Gauss-Seidel half-steps for each of which we can apply @eq:ineffective. This hypothetical last step $u^(r + 1) = G_h^"II" u^r$ is the most "ineffective" step:
+Similarly, this can be shown the other way around (when we swap $G_h^"I"$ and $G_h^"II"$):
+$
+"if" u = G_h^"I": wide (||G_h^"II" u||) / (||u||) <= (||G_h^"I" G_h^"II" u||) / (||G_h^"II" u||).
+$
+These two equations can be applied to the presmoother, which is an alternating sequence of $G_h^"I"$ and $G_h^"II"$:
+$
+(||u^(k + 1)||) / (||u^k||) <= (||u^(k + 2)||) / (||u^(k + 1)||) wide k = 0, ..., r - 2.
+$ <eq:ineffective-2>
+This means that the Gauss-Seidel half-steps become more ineffective over time (or in case of equality, the norm reduction stays the same). Note that the last step of the presmoother is always $G_h^"I"$, i.e., $u^r = G_h^"I" u^(r - 1)$. If we were to append another Gauss-Seidel half-step, we would have $u^(r + 1) = G_h^"II" u^r$. We know from @eq:G2-convergence that this step would have a norm reduction of $sqrt(rho)$ or less (the lower the better). Due to @eq:ineffective-2, his hypothetical last step $u^(r + 1) = G_h^"II" u^r$ is the most "ineffective" step:
 $
 (||u^(r + 1)||) / (||u^r||) >= (||u^(k + 1)||) / (||u^k||) wide k = 1, ..., r.
 $
-Therefore the first $r$ half-steps also have a norm reduction of $sqrt(rho)$ or smaller. Consequently, after $r$ half-steps, we have the following norm reduction:
+Therefore the first $r$ half-steps also have a norm reduction of $sqrt(rho)$ or smaller. Consequently, after $r$ half-steps, we have the following upper bound of the norm reduction:
 $
 ||u^r|| <= (sqrt(rho))^r ||u^0|| = rho^(r / 2) ||u^0||.
-$
+$ <eq:presmoother-convergence>
 
 = Exact Coarse Grid Correction <sec:exact-cgc>
+
+First we look at an exact coarse grid correction (i.e., the equation is solved without error on the coarser grid). In this step of the multigrid algorithm, we minimize the energy function $J(v)$ over $u^r + S_H$. In other words, we evaluate
+$
+u^(q - 1) := limits("argmin")_(v in S_H) space J(u^r - v).
+$
+Here, $u^(q - 1)$ is in $S_H$, the finite element space associated with the coarser grid on level $q - 1$. In the correction step, we compute
+$
+u' = u^r - u^(q - 1).
+$
+
+Note that the exact coarse grid correction is similar to the Gauss-Seidel half steps, only that we minimize $J$ over $u^r + S_H$ instead of $u + T_h$. Hence, using the same argument as in @eq:orthogonal-1 to @eq:orthogonal-2, we find that $u' perp S_H$ and
+$
+u^(q - 1) = P_(S_H) u^r \
+u' = u^r - u^(q - 1) = I u^r - P_(S_H) u^r = (I - P_(S_H)) u^r = P_(S_H^perp) u^r.
+$
+
+Furthermore, as observed earlier already, the last step of the presmoother is always $G_h^"I"$. The resulting vector $u^r$ is thus orthogonal to $T_h$ (compare vector $v$ in @fig:G1).
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: *
+		
+		scale(0.8)
+		line((0, 0), (-4, 5), mark: (end: ">"), stroke: 2pt)
+		content((-2, 2.5), $u^r$, anchor: "north-east", padding: 0.1)
+		line((0, 0), (0, 5), mark: (end: ">"), stroke: 2pt)
+		content((0, 2.5), $u'$, anchor: "west", padding: 0.2)
+		line((0, 0), (25/4, 5), mark: (end: ">"), stroke: 2pt)
+		content((25/8, 2.5), $w$, anchor: "north-west", padding: 0.1)
+		line((0, 5), (-4, 5), mark: (end: ">"), stroke: 2pt)
+		content((-2, 5), $u^(q - 1)$, anchor: "south", padding: 0.1)
+
+		line((-7, 0), (7, 0))
+		content((3.4, 0), $S_H$, anchor: "north", padding: 0.2)
+		line((-7, 5), (7, 5), stroke: (dash: "dashed"))
+
+		line((0.8, -1), (0, 0), stroke: (dash: "dashed"))
+
+		right-angle((0, 0), start: 219deg)
+
+		line((-1, -0.8), (15/2, 6), stroke: (dash: "dashed"))
+		content((15/2, 6), $T_h$, anchor: "south-east", padding: 0.1)
+
+		arc((0, 0), anchor: "origin", start: 90deg, stop: 128deg)
+		content((-0.21, 0.7), $alpha$)
+		arc((0, 0), anchor: "origin", start: 0deg, stop: 38deg)
+		content((0.7, 0.29), $alpha$)
+
+		right-angle((0, 5), start: 180deg)
+	}),
+	caption: [Visualization of the exact coarse grid correction, which is an orthogonal projection of $u^r$ onto $S_H^perp$.]
+)
+
+From @eq:lemma-3-1, we find
+$
+((v, w)) / (||v|| ||w||) = cos(alpha) <= sqrt(1/2 (1 - lambda^2)) wide forall v in S_H, w in T_h.
+$
+Since this equation is true for all $v in S_H$ and all $w in T_h$, this really says something about the angle $alpha$ between subspaces $S_H$ and $T_h$. Furthermore, this angle is the same as the angle between $u'$ and $u^r$ (as a consequence of $u' perp S_H$ and $u^r perp T_h$).
+
+Due to the right angle between $u'$ and $u^(q - 1)$, we find
+$
+||u'|| = cos(alpha) ||u^r|| &<= sqrt(1/2 (1 - lambda^2)) ||u^r|| = sqrt(((1 - lambda^2) / (lambda^2 + 1)) / (2 / (lambda^2 + 1))) ||u^r|| \
+&= sqrt(((lambda^2 + 1 - 2 lambda^2) / (lambda^2 + 1)) / ((2 lambda^2 + 2 - 2 lambda^2) / (lambda^2 + 1))) ||u^r|| = sqrt((1 - (2 lambda^2) / (lambda^2 + 1)) / (2 - (2 lambda^2) / (lambda^2 + 1))) ||u^r|| = sqrt((1 - rho) / (2 - rho)) ||u^r||.
+$ <eq:cos>
+
+This idea can be generalized to higher-dimensional function spaces for the following reason: Since $u^(q - 1)$ is projection of $u^r$ onto $S_H$, the length of $u'$ is the shortest distance between $u^r$ and $S_H$. If we add more dimensions to $S_H$, the shortest distance can only become smaller but not larger. Therefore, @eq:cos still holds.
+
+This equation gives us an upper bound for the norm reduction achieved by an exact coarse grid correction. Together with @eq:presmoother-convergence, we find
+$
+||u'|| &<= rho^(r / 2) sqrt((1 - rho) / (2 - rho)) ||u^0||
+$
+to account for both the presmoother and the exact coarse grid correction.
+
+#{
+let xs = lq.linspace(0, 1, num: 250)
+let r = 3
+show lq.selector(lq.legend): set grid(row-gutter: 1em)
+place($(r = 3)$, dx: 107pt, dy: 11pt)
+figure(
+	lq.diagram(
+		width: 200pt,
+		xaxis: (
+			label: $rho$
+		),
+		legend: (
+			position: (100% + 0.6em, 0%)
+		),
+		lq.plot(
+			xs,
+			x => calc.pow(x, r / 2),
+			label: $rho^(r/2)$,
+			mark: none,
+			stroke: 2pt,
+		),
+		lq.plot(
+			xs,
+			x => calc.sqrt((1 - x) / (2 - x)),
+			mark: none,
+			label: $sqrt((1 - rho) / (2 - rho))$,
+			stroke: 2pt,
+		),
+		lq.plot(
+			xs,
+			x => calc.pow(x, r / 2) * calc.sqrt((1 - x) / (2 - x)),
+			mark: none,
+			label: $rho^(r/2) sqrt((1 - rho) / (2 - rho))$,
+			stroke: 2pt,
+		),
+	),
+	caption: [Norm reduction (red) after the presmoother (blue) and exact coarse grid correction (yellow) as a function of $rho$.]
+)
+}
+
+Plotting the norm reduction of the presmoother and the exact coarse grid correction, we observe the following: In case the presmoother is not effective ($rho^(r / 2) = rho = 1$), the coarse grid correction is very effective ($sqrt((1 - rho) / (2 - rho)) -> 0$). Conversely, if the coarse grid correction is rather ineffective ($rho = 0$), the presmoother is very effective. The maximum of the red function, i.e., the worst possible norm reduction, is still far below $1$.
 
 = Non-Exact Coarse Grid Correction <sec:non-exact-cgc>
 
