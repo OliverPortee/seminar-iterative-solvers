@@ -378,7 +378,7 @@ $
 (G_h^"I" u)_i := cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h \\ Omega_H, u_i &wide& p_i in Omega_H)
 $
 
-#let fine-neighborhood =  cetz.canvas({
+#let fine-neighborhood = cetz.canvas({
 	import cetz.draw: circle, line, content, scale, floating
 
 	let grid-point(coords) = circle(
@@ -489,6 +489,8 @@ $
 	dy: 60pt,
 	image("images/3d-surface.png", width: 42%)
 )
+
+#highlight[Picture is wrong! $v$ is not the global minimum]
 
 
 #box([
