@@ -668,11 +668,11 @@ Plotting the norm reduction of the presmoother and the exact coarse grid correct
 Now we generalize the coarse grid correction to include an error. Instead of evaluating $u^(q - 1)$ exactly, we compute an approximation $v_1$ to $u^(q - 1)$. Assuming that we already know the convergence rate $delta_(q - 1)$ on the coarser level $q - 1$, and that perform a V-cycle with one recursive multigrid call, we find that the deviation from the exact error, $u^(q - 1)$ can be bounded:
 $
 ||v_1 - u^(q - 1)|| <= delta_(q - 1) ||u^(q - 1)||.
-$
+$ <eq:perturbation>
 To generalize this, we define
 $
 delta := cases(0 &wide& q = 1, (delta_(q - 1))^mu &wide& q > 1) wide wide wide mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
-$
+$ <eq:delta>
 and require that
 $
 ||v_1 - u^(q - 1)|| <= delta ||u^(q - 1)||.
@@ -878,3 +878,88 @@ $
 ||u^(2 r + 2)|| <= delta_q ||u^0|| wide "with" wide delta_q := max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)].
 $
 $delta_q$ is an upper bound for the norm reduction of a single multigrid iteration on level $q$. This equation can now be applied for both a two-grid method and a general multigrid method to get concrete numerical values for $delta_q$.
+
+= The Two-Grid Method
+
+In the two-grid method, we have only two different levels. During the coarse grid correction, we solve for the error exactly. Therefore (also see @eq:delta),
+$
+0 = ||v_1 - u^(q - 1)|| < delta ||u^(q - 1)|| wide ==> wide delta = 0.
+$
+
+In this case,
+$
+delta_"TG" := delta_q = max_(0 <= rho <= 1) [rho^r ((1 - delta) (1 - rho) / (2 - rho) + delta)] = max_(0 <= rho <= 1) underbrace([rho^r (1 - rho) / (2 - rho)], delta_"TG" (rho)).
+$
+
+#let maxima = range(5).map(r => {
+	if r == 0 {
+		return (0, 0.5)
+	}
+	let a = (3 * r + 1) / (2 * r)
+	let b = a - calc.sqrt(a * a - 2)
+	let c = calc.pow(b, r) * (1 - b) / (2 - b)
+	return (b, c)
+})
+
+#figure(
+	lq.diagram(
+		..range(5).map(r => lq.plot(
+			lq.linspace(1e-8, 1),
+			x => calc.pow(x, r) * (1 - x) / (2 - x),
+			mark: none,
+			label: $r = #r$,
+		)),
+		lq.scatter(
+			maxima.map(m => m.at(0)),
+			maxima.map(m => m.at(1)),
+			color: black,
+		),
+		legend: (
+			position: (100% + 0.5em, 0%),
+		),
+		xaxis: (
+			label: $rho$,
+		),
+		yaxis: (
+			label: $delta_"TG" (rho)$
+		),
+	),
+	caption: [Maxima of $delta_"TG" (rho)$ for different values of $r$.]
+)
+
+The maxima of $rho_"TG" (rho)$ can be found analytically by setting its derivative to zero. However, the resulting term for the maximum is rather complicated. Braess found a good upper bound:
+$
+rho_"TG" < 1/((r + 1) e).
+$
+
+= The General Multigrid Method
+
+When we have more than two levels, $delta = (delta_(q - 1))^mu$ for $q > 1$ (@eq:delta). Then the norm reduction becomes
+$
+delta_q = max_(0 <= rho <= 1) [rho^r ((1 - (delta_(q - 1))^mu) (1 - rho) / (2 - rho) + (delta_(q - 1))^mu)]
+$
+
+Note that this recursive function reflects the recursive nature of the multigrid algorithm. We assume that the multigrid convergence is independent of the level $q$, i.e.,
+$
+delta_q = delta_(q - 1) =: delta_"MG".
+$
+Then we find
+$
+delta_"MG" = max_(0 <= rho <= 1) [rho^r ((1 - (delta_"MG")^mu) (1 - rho) / (2 - rho) + (delta_"MG")^mu)]
+$
+This equation can be solved numerically. The resulting convergence rates can be seen in @tab:convergence-rates.
+
+#figure(
+	table(
+		columns: 5,
+		stroke: none,
+		table.cell(align: right, $r ->$), table.vline(), $0$, $1$, $2$, $3$,
+		table.hline(),
+		[*Two-Grid*], $0.5$, $0.172$, $0.114$, $0.086$,
+		[*MG $mu = 1$ (V-cycle)*], $$, $1/2$, $1/3$, $1/4$,
+		[*MG $mu = 2$ (W-cycle)*], $$, $0.187$, $0.120$, $0.087$
+	),
+	caption: [Numerical values of the convergence rate for the two-grid method and the general multigrid method, as given by Braess.]
+) <tab:convergence-rates>
+
+Note that these convergence rates are far below $1$, proving not only that the multigrid method converges but also that it converges _fast_.
