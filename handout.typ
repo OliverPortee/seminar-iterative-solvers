@@ -382,7 +382,7 @@ $
 (|u|) / (||u||) <= lambda / sqrt(1/2 (1 + lambda^2)) = sqrt(lambda^2 / (1/2 (1 + lambda^2))) = sqrt((2 lambda^2) / (1 + lambda^2)) =: sqrt(rho)
 $
 
-= Gauß-Seidel Relaxation
+= Gauss-Seidel Relaxation
 
 We use a finite element discretization. Interestingly, the stencil is the same for all inner grid points, whether in $Omega_h$ or in $Omega_H$:
 
