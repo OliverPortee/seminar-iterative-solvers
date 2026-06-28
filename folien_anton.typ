@@ -186,11 +186,13 @@ $
 
 Hierfür betrachten wir zuerst die Gauss-Seidel Relaxation auf dem feinsten Gitter. Hier wollen wir zeigen, dass
 
-$
-&(1) wide |u^k| <= C dot ||u^k|| wide "(Der grobe Fehler ist kleiner als der feine)" \
-&(2) wide ||u^(k+1)|| <= |u^k| wide "(der feine Fehler" \
-&" im nächsten Schritt ist kleiner als der Grobe Fehler im vorherigen)"
-$
+#table(
+	columns: 3,
+	stroke: none,
+	inset: 19pt,
+	$(1)$, $|u^k| <= C dot ||u^k||$, [(Der grobe Fehler ist kleiner als der feine)],
+	$(2)$, $||u^(k+1)|| <= |u^k|$, [(Der feine Fehler im nächsten Schritt ist kleiner als der grobe Fehler im vorherigen)],
+)
 
 $
 ==> wide ||u^(k+1)|| <= C dot ||u^k||
