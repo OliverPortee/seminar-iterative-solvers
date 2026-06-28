@@ -69,6 +69,8 @@ The domain is discretized using the following grids. The coarse grid $Omega_H$ h
 	caption: [Grid hierarchy with the grid $Omega_h$ on level $q$, $Omega_H$ on level $q - 1$ and $Omega_(2 h)$ on level $q - 2$.]
 )
 
+Here, the function space $S_h$ is the finite element space corresponding to the fine grid $Omega_h$. It contains piecewise linear functions, with one degree of freedom at each inner grid point. Additionally, due to the Dirichlet boundary condition, they must be zero on the boundary.
+
 Furthermore, we define both a norm and a semi-norm. The norm ("energy norm") is given by
 $
 ||v|| := sqrt(a(v, v)).
@@ -475,7 +477,7 @@ $
 (G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& ("yellow"), u_i &wide& p_i in Omega_h without Omega_H &wide& ("blue") )
 $
 
-Here, $N(i)$ is the set of neighboring points with distance h to $p_i$.
+Here, $N(i)$ is the set of neighboring points with distance $h$ to $p_i$. The operator $G_h^"I" dot G_h^"II"$ represents a full Gauss-Seidel step.
 
 *Lemma 4.1*
 
