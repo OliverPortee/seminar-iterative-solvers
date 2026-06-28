@@ -755,7 +755,7 @@ $
 
 Exakte Lösung:
 $
-u^(q - 1) := limits("argmin")_(u in S_H) space J(u^r - u)
+u^(q - 1) := limits("argmin")_(v in S_H) space J(u^r - v)
 $
 
 Exakte Grobgitterkorrektur:
