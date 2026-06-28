@@ -137,7 +137,6 @@ $
 
 #hi[a(u,v) entspricht der linken Seite in der schwachen Form]
 
-#pause
 
 
 == Auswertung der Energienorm

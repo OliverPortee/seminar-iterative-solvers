@@ -81,7 +81,7 @@ $
 ||v||^2 = a(v, v) &= integral_Omega v_xi^2 + v_eta^2 \
 &= sum_nu integral_nu v_xi^2 + v_eta^2 \
 &= sum_nu (lr(v_xi^2|)_nu + lr(v_eta^2|)_nu) underbrace(1/2 h^2, op("area")(nu)) \
-&= sum_nu ((v_"east" - v_"west")^2 / h^2 + (v_"north" - v_"south")^2 / h^2) 1/2 h^2 \
+&= sum_nu ((v_"east" - v_"center")^2 / h^2 + (v_"north" - v_"center")^2 / h^2) 1/2 h^2 \
 &= sum_nu 1/2 (v_"east" - v_"west")^2 + sum_nu 1/2 (v_"north" - v_"south")^2 \
 &= sum_vec(i\, j in Omega_h, d(i, j) = h, delim: #none) (v_i - v_j)^2.
 $
