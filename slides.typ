@@ -763,6 +763,33 @@ $
 u' = u^r - u^(q - 1)
 $
 
+
+== Exakte Grobgitterkorrektur ist Orthogonalprojektion
+
+#figure(
+	cetz.canvas({
+		import cetz.draw: *
+
+		scale(1.5)
+		
+		line((-3, 0), (8, 0))
+
+		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
+		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
+		right-angle((6, 0), start: 90deg)
+
+		floating({
+			content((3, 3), $u^r$, anchor: "south-east")
+			content((3, 0), $u^(q - 1) = P_(S_H) u^r$, anchor: "north", padding: 0.3)
+			content((0, 0), $0$, anchor: "north", padding: 0.2)
+			content((6, 3), $u' &= P_(S_H^perp) u^r$, anchor: "west", padding: 0.2)
+			content((8, 0), $S_H$, anchor: "west", padding: 0.2)
+		})
+	})
+)
+
+
 == Exakte Grobgitterkorrektur
 
 Aus Teil 1:
@@ -949,31 +976,6 @@ $
 ||v_1 - u^(q - 1)|| <= delta ||u^(q - 1)||
 $
 
-== Exakte Grobgitterkorrektur ist Orthogonalprojektion
-
-#figure(
-	cetz.canvas({
-		import cetz.draw: *
-
-		scale(1.5)
-		
-		line((-3, 0), (8, 0))
-
-		line((0, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
-		line((6, 0), (6, 6), stroke: 2pt, mark: (end: ">"))
-		line((0, 0), (6, 0), stroke: 2pt, mark: (end: ">"))
-		right-angle((6, 0), start: 90deg)
-
-		floating({
-			content((3, 3), $u^r$, anchor: "south-east")
-			content((3, 0), $u^(q - 1)$, anchor: "north", padding: 0.3)
-			content((0, 0), $0$, anchor: "north", padding: 0.2)
-			content((6, 3), $u' &= u^r - u^(q - 1) \ &= underbrace((I - P_(S_H)), =: Q) u^r$, anchor: "west", padding: 0.2)
-			content((8, 0), $S_H$, anchor: "west", padding: 0.2)
-		})
-	})
-)
-
 == Nicht-Exakte Grobgitterkorrektur
 
 $
@@ -1034,7 +1036,7 @@ $
 (tilde(G) u, v) = (u, tilde(G)^* v)
 $
 
-== Fast Geschafft
+== Abschätzung von $(hat(u), u^(2 r + 2)) wide forall hat(u)in S_h$
 
 $
 (hat(u), u^(2 r + 2)) = (hat(u), tilde(G)^* u^(r + 1)) = (tilde(G) hat(u), u' + delta v_2) \
