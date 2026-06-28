@@ -195,7 +195,7 @@
 	}
 }
 
-#let draw-grid(show-th: false) = {
+#let draw-grid(show-th: false, show-diag: true, show-inner: true) = {
 	import cetz.draw: line
 
 	if show-th {
@@ -213,17 +213,23 @@
 	}
 
 	for x in range(W + 1) {
-		line((x, 0), (x, H))
+		if show-inner or even(x) {
+			line((x, 0), (x, H))
+		}
 	}
 	for y in range(H + 1) {
-		line((0, y), (W, y))
+		if show-inner or even(y) {
+			line((0, y), (W, y))
+		}
 	}
-	for x in range(W) {
-		for y in range(H) {
-			if odd(x + y) {
-				line((x + 1, y), (x, y + 1))
-			} else {
-				line((x, y), (x + 1, y + 1))
+	if show-diag {
+		for x in range(W) {
+			for y in range(H) {
+				if odd(x + y) {
+					line((x + 1, y), (x, y + 1))
+				} else {
+					line((x, y), (x + 1, y + 1))
+				}
 			}
 		}
 	}

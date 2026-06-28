@@ -15,10 +15,6 @@
 #let G1(content) = Gbox(content, fine-color)
 #let G2(content) = Gbox(content, coarse-color)
 
-// einfarbige Gitter wie im Handout (statt der bunten lib.typ-Gitter)
-// single-color-grid/seminorm-grid liegen zentral in triangulation-single-color.typ
-#import "triangulation-single-color.typ": all-blue, single-color-grid, seminorm-grid
-
 #title-slide[
 #v(1fr)
 = MG Konvergenzrate
@@ -37,7 +33,8 @@ $
 u = 0 &wide& "auf" partial Omega
 $
 
-#pause
+
+
 
 
 
@@ -148,7 +145,7 @@ $
 	cetz.canvas({
 		import cetz.draw: *
 		scale(1.2)
-		single-color-grid(all-blue, real-diag: (x, y) => false)
+		draw-grid(show-diag: false)
 	})
 )
 
@@ -167,7 +164,7 @@ $
 		cetz.canvas({
 			import cetz.draw: *
 			scale(1.1)
-			seminorm-grid()
+			draw-grid(show-diag: false, show-inner: false)
 		})
 	),
 	$
@@ -210,8 +207,6 @@ $
 $
 1/2 (c-a)^2 <=(c-b)^2 + (b-a)^2 ==>  |u| <= ||u|| wide forall u in S_h
 $
-
-#pause
 
 = Obere Schranke für $(|u|) / (||u||)$
 
