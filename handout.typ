@@ -1351,3 +1351,5 @@ This equation can be solved numerically. The resulting convergence rates can be 
 ) <tab:convergence-rates>
 
 Note that these convergence rates are far below $1$, proving not only that the multigrid method converges but also that it converges _fast_.
+
+#bibliography("references.bib", full: true)
