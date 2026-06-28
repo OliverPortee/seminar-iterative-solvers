@@ -1226,6 +1226,8 @@ $
 	)
 )
 
+#show: appendix
+
 == Glätter und Grobgitterkorrektur minimieren Energiefunktional
 
 $
