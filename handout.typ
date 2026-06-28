@@ -13,13 +13,6 @@
 _Based on the paper by Braess_ @braess1984convergence
 ]
 
-#let definition-box(body) = box(
-	stroke: 1pt,
-	inset: 7pt,
-	width: 100%,
-	body
-)
-
 #let Gbox(content, color) = box(fill: color.transparentize(70%), inset: (top: 7pt, bottom: 4pt, left: 3pt, right: 2pt), radius: 5pt, stroke: color, baseline: 15%, content)
 #let G1(content) = Gbox(content, fine-color)
 #let G2(content) = Gbox(content, coarse-color)
@@ -50,7 +43,7 @@ We also introduce the energy functional
 $
 J(u) := a(u, u) - 2 (f, u)_0.
 $
-It can be shown that the solution of the strong (or weak) form of the poisson equation is equivalent to finding the minimizer of $J$.
+It can be shown that the solution of the strong (or weak) form of the Poisson equation is equivalent to finding the minimizer of $J$.
 
 In this proof we typically assume the homogeneous problem ($f = 0$) since we only want to examine error convergence. In this case, the exact solution is $u^* = 0$. Hence, an approximation $u^k$ is equivalent to the error $e^k = u^k - u^* = u^k$. Furthermore, $J$ simplifies to $J(u) = a(u, u)$.
 
@@ -134,7 +127,7 @@ $
 $
 
 
-The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2). Note that each pair $(i, j)$ is only used once, meaning that if we include pair $(i, j)$ in the sum ($i != j$), we do not include $(j, i)$ as well.
+The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2). Note that each pair $(i, j)$ is only used once, meaning that if we include pair $(i, j)$ in the sum, we do not include $(j, i)$ as well.
 
 Similarly, we define a seminorm (i.e., something that looks like a norm but that could evaluate to zero, $|x| = 0$, even though $x != 0$),
 
@@ -204,9 +197,9 @@ a(v,w)_"I" = integral_"I" v_xi w_xi + v_eta w_eta = integral_"I" v_xi w_xi + int
 $
 
 $
-integral_"I" v_xi w_xi = integral_(I_"links") v_xi w_xi + integral_(I_"rechts") v_xi w_xi = 0
+integral_"I" v_xi w_xi = integral_(I_"left") v_xi w_xi + integral_(I_"right") v_xi w_xi = 0
 $
-da $lr(w_xi|)_(I_"links") = - lr(w_xi|)_(I_"rechts")$ und $v_xi = "const"$.
+da $lr(w_xi|)_(I_"left") = - lr(w_xi|)_(I_"right")$ und $v_xi = "const"$.
 
 $
 integral_"I" v_eta w_eta
@@ -391,7 +384,7 @@ $
 
 = Gauß-Seidel Relaxation
 
-We use a finite element discretization. Interestingly, the stencil for the black all points is the same, wheter in $Omega_h$ or in $Omega_H$:
+We use a finite element discretization. Interestingly, the stencil is the same for all inner grid points, whether in $Omega_h$ or in $Omega_H$:
 
 $
 mat(0, -1, 0; -1, 4, -1; 0, -1, 0)
@@ -433,6 +426,8 @@ cetz.canvas({
 	line(p4, p8)
 	line(p2, p6)
 	line(p2, p4, p6, p8, close: true)
+	let yellow = coarse-color
+	let blue = fine-color
 	d(p1, blue)
 	d(p2, yellow)
 	d(p3, blue)
@@ -477,9 +472,9 @@ where $b_i = integral_Omega f phi_i$ is the right-hand side. In the following se
 
 We split the Gauss-Seidel relaxation into two steps ($eq.est$ red-black Gauss-Seidel). First, we will smooth the fine points ($in Omega_h without Omega_H$), then the coarse points ($in Omega_H$). Formally,
 $
-(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H wide ("yellow") &wide& , 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h without Omega_H wide ("blue") 
+(G_h^"I" u)_i &= cases(u_i &wide& p_i in Omega_H &wide& ("yellow"), 1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_h without Omega_H &wide& ("blue") 
 ) \
-(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H wide("yellow") &wide& , u_i &wide& p_i in Omega_h without Omega_H wide ("blue") )
+(G_h^"II" u)_i &= cases(1/4 sum_(j in N(i)) u_j &wide& p_i in Omega_H &wide& ("yellow"), u_i &wide& p_i in Omega_h without Omega_H &wide& ("blue") )
 $
 
 Here, $N(i)$ is the set of neighboring points with distance h to $p_i$.
@@ -523,6 +518,8 @@ Let $macron(u) := G_h^"II" u$, and fix a point $p_0 in Omega_H$ with its four ne
 		line(p1, p5)
 		line(p4, p8)
 		line(p2, p6)
+		let yellow = coarse-color
+		let blue = fine-color
 		d(p1, yellow)
 		d(p2, blue)
 		d(p3, yellow)
@@ -872,7 +869,7 @@ Analogously, it can be shown that $G_h^"II"$ is an orthogonal projection. In thi
 
 A fundamental property of orthogonal projections is that they are self-adjoint.
 
-#definition-box[
+#hi[
 	An operator $Q^*$ is the adjoint of $Q$ if
 	$
 	(Q u, v) = (u, Q^* v) wide forall u, v.
@@ -906,10 +903,10 @@ $
 &<= ||u|| dot ||G_h^"II" G_h^"I" u|| &wide& "Cauchy-Schwarz inequality".
 $ <eq:ineffective-1>
 
-#definition-box[
+#hi[
 Cauchy-Schwarz inequality:
 $
-|(u, v)| <= ||u|| dot ||v|| wide forall u, v
+|(u, v)| <= ||u|| dot ||v|| wide forall u, v.
 $ <eq:cauchy-schwarz>
 The case of equality happens when $u$ and $v$ are linearly dependent,
 $
@@ -988,7 +985,7 @@ Furthermore, as observed earlier already, the last step of the presmoother is al
 
 		right-angle((0, 5), start: 180deg)
 	}),
-	caption: [Visualization of the exact coarse grid correction, which is an orthogonal projection of $u^r$ onto $S_H^perp$.]
+	caption: [Visualization of the exact coarse grid correction, which is an orthogonal projection of $u^r$ onto $S_H^perp$, based on @braess1981contraction[Lemma 3.1].]
 )
 
 From @eq:lemma-3-1, we find
@@ -1015,8 +1012,8 @@ to account for both the presmoother and the exact coarse grid correction.
 let xs = lq.linspace(0, 1, num: 250)
 let r = 3
 show lq.selector(lq.legend): set grid(row-gutter: 1em)
-place($(r = 3)$, dx: 107pt, dy: 11pt)
 figure(
+	place($(r = 3)$, dx: 106.7pt, dy: 11.5pt) +
 	lq.diagram(
 		width: 200pt,
 		xaxis: (
@@ -1139,9 +1136,9 @@ To account for a full multigrid iteration, we need to include the presmoother, n
 	caption: [First two iterations of the multigrid algorithm. \ The coarse grid correction is abbreviated as CGC.]
 ) <tab:no-duplicate>
 
-Note that in the first iteration, we have an addition $G^(r + 1)$ at the beginning of the presmoother. This half-step is missing in all subsequent iterations. If we were to include $G^(r + 1)$ at the beginning of the presmoother of each iteration, we would have a duplicate. For example for $r = 3$ the postsmoother of iteration 1 would end with $G_h^"II"$ and the presmoother of iteration 2 would start with $G_h^"II"$ again. However, since the Gauss-Seidel half-steps are idempotent (as they are projections), we have $G_h^"II" dot G_h^"II" = G_h^"II"$. The additional half-step in the presmoother would not have any effect.
+Note that in the first iteration, we have an additional $G^(r + 1)$ at the beginning of the presmoother. This half-step is missing in all subsequent iterations. If we were to include $G^(r + 1)$ at the beginning of the presmoother of each iteration, we would have a duplicate. For example for $r = 3$ the postsmoother of iteration 1 would end with $G_h^"II"$ and the presmoother of iteration 2 would start with $G_h^"II"$ again. However, since the Gauss-Seidel half-steps are idempotent (as they are projections), we have $G_h^"II" dot G_h^"II" = G_h^"II"$. The additional half-step in the presmoother would not have any effect.
 
-However, for the same reason, it is possible to include $G^(r + 1)$ conceptionally at the beginning of each presmoother. Mathematically, this is the same algorithm as in @tab:no-duplicate. This has the benefit that now the postsmoother is the reverse of the presmoother, such that
+However, for the same reason, it is possible to include $G^(r + 1)$ conceptually at the beginning of each presmoother. Mathematically, this is the same algorithm as in @tab:no-duplicate. This has the benefit that now the postsmoother is the reverse of the presmoother, such that
 $
 tilde(G) &= G^(r + 1) G^r ... G^1 &wide& "presmoother" \
 tilde(G)^* &= G^1 ... G^r G^(r + 1) &wide& "postsmoother".
@@ -1169,7 +1166,7 @@ Subsequently, we will find the upper bound
 $
 (hat(u) / (||hat(u)||), u^(2 r + 2)) <= delta_q ||u^0|| wide forall hat(u) in S_h.
 $
-Since this upper bound must be valid for all possible $hat(u)$, it must be valid vor $hat(u) = u^(2 r + 2)$ as well (when we have an equality in @eq:duality). In this special case, we find
+Since this upper bound must be valid for all possible $hat(u)$, it must be valid for $hat(u) = u^(2 r + 2)$ as well (when we have an equality in @eq:duality). In this special case, we find
 $
 (u^(2 r + 2) / (||u^(2 r + 2)||), u^(2 r + 2)) = ||u^(2 r + 2)|| <= delta_q ||u^0||.
 $ <eq:duality-end>
