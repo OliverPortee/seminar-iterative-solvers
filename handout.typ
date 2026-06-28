@@ -6,9 +6,12 @@
 #set page(numbering: "1")
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
-#let infobox(content) = box(width: 100%, inset: 0.8em, stroke: blue, content)
 
-#title[Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
+#align(right)[Anton Wiede, Oliver Portee, 29.06.2026]
+#align(center)[
+#title[The Convergence Rate of a Multigrid Method with Gauss-Seidel Relaxation for the Poisson Equation]
+_Based on the paper by Braess_ @braess1984convergence
+]
 
 #let definition-box(body) = box(
 	stroke: 1pt,
@@ -23,41 +26,61 @@
 
 = Setup
 
-Poisson equation with Dirichlet boundary conditions
+We start with the Poisson equation with Dirichlet boundary conditions:
 $
 -laplace u = f &wide& &"in" Omega \
-u = 0 &wide& &"on" partial Omega
+u = 0 &wide& &"on" partial Omega.
 $
+The equivalent weak form is
+$
+a(u, v) = (f, v)_0 wide forall v in S_h
+$
+where $a(dot, dot)$ is the bilinear form
+
+$
+a(u, v) := integral_Omega grad u dot grad v thin dif xi thin dif eta = integral_Omega (u_xi v_xi + u_eta v_eta) thin dif xi thin dif eta
+$ <eq:bilinear-form>
+
+and $(dot, dot)_0$ is the inner product of $L^2$,
+$
+(f, v)_0 := integral_Omega f v thin dif xi thin dif eta.
+$
+
+We also introduce the energy functional
+$
+J(u) := a(u, u) - 2 (f, u)_0.
+$
+It can be shown that the solution of the strong (or weak) form of the poisson equation is equivalent to finding the minimizer of $J$.
+
+In this proof we typically assume the homogeneous problem ($f = 0$) since we only want to examine error convergence. In this case, the exact solution is $u^* = 0$. Hence, an approximation $u^k$ is equivalent to the error $e^k = u^k - u^* = u^k$. Furthermore, $J$ simplifies to $J(u) = a(u, u)$.
 
 = Grids
 
-$
-Omega_h &: "Dreiecke mit Kantenlängen" h "und" sqrt(2) h \
-Omega_H &: "Dreiecke mit Kantenlängen" sqrt(2) h "und" 2 h \
-Omega_(2h) &: "Dreiecke mit Kantenlängen" 2h "und" 2 sqrt(2) h
-$
-
 #figure(
 	cetz.canvas({
-		import cetz.draw: content, translate, scale
+		import cetz.draw: content, translate, scale, floating
 		scale(0.7)
 		draw-grid()
+		floating(content((-0.3, 0.5), $h$))
+		content((0.5, -0.3), $h$)
 		content((W / 2, H + 0.5), $Omega_h$)
 		translate(x: 8)
 		draw-coarse-grid()
+		content((-0.4, 1), $2h$)
+		content((1, -0.3), $2h$)
 		content((W / 2, H + 0.5), $Omega_H$)
 		translate(x: 8)
 		draw-2h-grid()
 		content((W / 2, H + 0.5), $Omega_(2h)$)
 	}),
-	caption:["The grid is divided into fine points (blue) and coarse points (yellow)"]
+	caption: [The grid is divided into fine points (blue) and coarse points (yellow).]
 )
 
 = Decomposition
 
 $
-S_h &: "finite Elemente Raum auf" Omega_h \
-S_H &: "finite Elemente Raum auf" Omega_H \
+S_h &: "finite element space on" Omega_h \
+S_H &: "finite element space on" Omega_H \
 T_h &:= {w in S_h | w(p) = 0 wide forall p in Omega_H}
 $
 
@@ -76,7 +99,7 @@ $
 		draw-th-grid()
 		content((W/2, -0.5), $w in T_h$)
 	}),
-	caption: [The space $S_h$ of the fine grid can be expressed as a sum of the space $S_H$ on the coarse grid (middle) and the space $T_h$ (right).]
+	caption: [The space $S_h$ of the fine grid (left) can be expressed as a sum of the space $S_H$ on the coarse grid (middle) and the space $T_h$ (right).]
 )
 
 $
@@ -95,12 +118,7 @@ The basis functions of $T_h$ form pyramid-like patterns. As a result, all functi
 
 = Norms
 
-For $u, v in S_h$, we define the bilinear form
-$
-a(u, v) := integral_Omega (u_xi v_xi + u_eta v_eta) thin dif xi thin dif eta.
-$
-
-Furthermore, the energy norm is given by
+The energy norm is given by
 $
 ||v|| := sqrt(a(v, v)).
 $
@@ -676,22 +694,6 @@ $
 u^(2 r + 2) = G^1 G^2 ... G^r G^(r + 1) u^(r + 1) = tilde(G)^* u^(r + 1)
 $ <eq:Gstar>
 
-We also introduce the energy functional
-$
-J(u) := a(u, u) - 2 (f, u)_0
-$
-where $a(dot, dot)$ is the bilinear form derived from the weak form of the poisson equation,
-$
-a(u, v) := integral_Omega grad u dot grad v = integral_Omega u_xi v_xi + u_eta v_eta,
-$
-and $(dot, dot)_0$ is the inner product of $L^2$,
-$
-(f, u)_0 := integral_Omega f u.
-$
-It can be shown that the solution of the strong (or weak) form of the poisson equation is equivalent to finding the minimizer of $J$. Note that for the homogeneous problem, $J$ simplifies to
-$
-J(u) = a(u, u).
-$
 
 In part 1 we have already shown the following three statements:
 
