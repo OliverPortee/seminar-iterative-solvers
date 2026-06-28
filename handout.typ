@@ -175,11 +175,11 @@ The basis functions of $T_h$ form pyramid-like patterns. As a result, all functi
 		line(p4, p2)
 
 		let r = 2pt
-		circle(p1, radius: r, stroke: none, fill: red)
-		circle(p2, radius: r, stroke: none, fill: olive)
-		circle(p3, radius: r, stroke: none, fill: red)
-		circle(p4, radius: r, stroke: none, fill: olive)
-		circle(p5, radius: r, stroke: none, fill: black)
+		circle(p1, radius: r, stroke: none, fill: coarse-color)
+		circle(p2, radius: r, stroke: none, fill: coarse-color)
+		circle(p3, radius: r, stroke: none, fill: coarse-color)
+		circle(p4, radius: r, stroke: none, fill: coarse-color)
+		circle(p5, radius: r, stroke: none, fill: fine-color)
 
 		content(p1, $1$, anchor: "east", padding: 0.25)
 		content(p3, $3$, anchor: "east", padding: 0.25)
@@ -625,7 +625,6 @@ and combining the two displays gives $||G_h^"II" G_h^"I" u|| <= |u|$ for every $
 
 
 = The Multigrid Algorithm
-
 
 The multigrid algorithm consists of the presmoother, the coarse grid correction and the postsmoother.
 
