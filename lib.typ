@@ -1,4 +1,4 @@
-#import "@preview/cetz:0.5.0"
+#import "@preview/cetz:0.5.2"
 #import "@preview/physica:0.9.8": *
 #import "@preview/lilaq:0.6.0" as lq
 #import "@preview/tiptoe:0.4.0"
