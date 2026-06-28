@@ -238,7 +238,7 @@ $
 
 Together with $C$, we get
 $
-sum_nu C_nu + D_nu &>= sum_vec(i\, j in Omega_(2h), d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j "red", d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
+sum_nu C_nu + D_nu &>= sum_vec(i\, j in Omega_(2h), d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 + sum_vec(i\, j in Omega_H \\ Omega_(2 h), d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/4 (v_i - v_j)^2 \
 &= 1/2 sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2 \
 &= 1/2 |v|^2
