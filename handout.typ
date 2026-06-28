@@ -47,7 +47,7 @@ It can be shown that the solution of the strong (or weak) form of the Poisson eq
 
 In this proof we typically assume the homogeneous problem ($f = 0$) since we only want to examine error convergence. In this case, the exact solution is $u^* = 0$. Hence, an approximation $u^k$ is equivalent to the error $e^k = u^k - u^* = u^k$. Furthermore, $J$ simplifies to $J(u) = a(u, u)$.
 
-= Grids
+The domain is discretized using the following grids. The coarse grid $Omega_H$ has the same structure as the fine grid $Omega_h$, only that it is rotated by $45°$ and has a spacing of $H = sqrt(2) h$
 
 #figure(
 	cetz.canvas({
@@ -66,8 +66,49 @@ In this proof we typically assume the homogeneous problem ($f = 0$) since we onl
 		draw-2h-grid()
 		content((W / 2, H + 0.5), $Omega_(2h)$)
 	}),
-	caption: [The grid is divided into fine points (blue) and coarse points (yellow).]
+	caption: [Grid hierarchy with the grid $Omega_h$ on level $q$, $Omega_H$ on level $q - 1$ and $Omega_(2 h)$ on level $q - 2$.]
 )
+
+Furthermore, we define both a norm and a semi-norm. The norm ("energy norm") is given by
+$
+||v|| := sqrt(a(v, v)).
+$
+
+Therefore,
+$
+||v||^2 = a(v, v) &= integral_Omega v_xi^2 + v_eta^2 \
+&= sum_nu integral_nu v_xi^2 + v_eta^2 \
+&= sum_nu (lr(v_xi^2|)_nu + lr(v_eta^2|)_nu) underbrace(1/2 h^2, op("area")(nu)) \
+&= sum_nu ((v_"east" - v_"west")^2 / h^2 + (v_"north" - v_"south")^2 / h^2) 1/2 h^2 \
+&= sum_nu 1/2 (v_"east" - v_"west")^2 + sum_nu 1/2 (v_"north" - v_"south")^2 \
+&= sum_vec(i\, j in Omega_h, d(i, j) = h, delim: #none) (v_i - v_j)^2.
+$
+
+
+The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2). Note that each pair $(i, j)$ is only used once, meaning that if we include pair $(i, j)$ in the sum, we do not include $(j, i)$ as well.
+
+Similarly, we define a seminorm (i.e., something that looks like a norm but that could evaluate to zero, $|x| = 0$, even though $x != 0$),
+
+$
+|v|^2 := sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2.
+$
+
+#hi[Note that for both norms the sum is only taken over all vertical and horizontal edges of the triangulation (i.e., pairs $(i, j)$ with Euclidean distance $h$), not over the diagonal edges.]
+
+For any $p_i, p_j in Omega_H$ with $d(i, j) = 2 h$, the midpoint $p_k$ between them lies in $Omega_h$ and satisfies $d(i, k) = d(k, j) = h$. Since
+$
+(u_i - u_j)^2 = ((u_i - u_k) + (u_k - u_j))^2 <= 2(u_i - u_k)^2 + 2(u_k - u_j)^2
+$
+(this follows from $((u_i - u_k) - (u_k - u_j))^2 >= 0$), summing over all such pairs gives
+$
+|u|^2 = sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (u_i - u_j)^2 <= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) (u_i - u_k)^2 + (u_k - u_j)^2.
+$
+Every point $p_k in Omega_h \\ Omega_H$ has exactly two $2 h$-edges of $Omega_H$ passing through it, contributing exactly its four incident $h$-edges of $Omega_h$. Hence, summing over all pairs $(i, j) in Omega_H$, every $h$-edge $(i, k)$ with $p_k in Omega_h \\ Omega_H$ appears exactly once on the right-hand side, so it equals $||u||^2$. Therefore,
+$
+|u| <= ||u|| wide forall u in S_h.
+$
+
+#pagebreak()
 
 = Decomposition
 
@@ -109,48 +150,7 @@ The basis functions of $T_h$ form pyramid-like patterns. As a result, all functi
 	caption: [Each shaded area corresponds to one of the basis functions of $T_h$. The supports of the respective basis functions are disjoint (they do not overlap each other).]
 )
 
-= Norms
-
-The energy norm is given by
-$
-||v|| := sqrt(a(v, v)).
-$
-
-Therefore,
-$
-||v||^2 = a(v, v) &= integral_Omega v_xi^2 + v_eta^2 \
-&= sum_nu integral_nu v_xi^2 + v_eta^2 \
-&= sum_nu (lr(v_xi^2|)_nu + lr(v_eta^2|)_nu) underbrace(1/2 h^2, op("area")(nu)) \
-&= sum_nu ((v_"east" - v_"west")^2 / h^2 + (v_"north" - v_"south")^2 / h^2) 1/2 h^2 \
-&= sum_nu 1/2 (v_"east" - v_"west")^2 + sum_nu 1/2 (v_"north" - v_"south")^2 \
-&= sum_vec(i\, j in Omega_h, d(i, j) = h, delim: #none) (v_i - v_j)^2.
-$
-
-
-The last step is justified because each vertical and horizontal border is adjacent to two different triangles (accounting for the factor 2). Note that each pair $(i, j)$ is only used once, meaning that if we include pair $(i, j)$ in the sum, we do not include $(j, i)$ as well.
-
-Similarly, we define a seminorm (i.e., something that looks like a norm but that could evaluate to zero, $|x| = 0$, even though $x != 0$),
-
-$
-|v|^2 := sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (v_i - v_j)^2.
-$
-
-#hi[Note that for both norms the sum is only taken over all vertical and horizontal edges of the triangulation (i.e., pairs $(i, j)$ with Euclidean distance $h$), not over the diagonal edges.]
-
-For any $p_i, p_j in Omega_H$ with $d(i, j) = 2 h$, the midpoint $p_k$ between them lies in $Omega_h$ and satisfies $d(i, k) = d(k, j) = h$. Since
-$
-(u_i - u_j)^2 = ((u_i - u_k) + (u_k - u_j))^2 <= 2(u_i - u_k)^2 + 2(u_k - u_j)^2
-$
-(this follows from $((u_i - u_k) - (u_k - u_j))^2 >= 0$), summing over all such pairs gives
-$
-|u|^2 = sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) 1/2 (u_i - u_j)^2 <= sum_vec(i\, j in Omega_H, d(i, j) = 2 h, delim: #none) (u_i - u_k)^2 + (u_k - u_j)^2.
-$
-Every point $p_k in Omega_h \\ Omega_H$ has exactly two $2 h$-edges of $Omega_H$ passing through it, contributing exactly its four incident $h$-edges of $Omega_h$. Hence, summing over all pairs $(i, j) in Omega_H$, every $h$-edge $(i, k)$ with $p_k in Omega_h \\ Omega_H$ appears exactly once on the right-hand side, so it equals $||u||^2$. Therefore,
-$
-|u| <= ||u|| wide forall u in S_h.
-$
-
-= Estimating a(v,w)
+= Bounding the Bilinear Form $a(v, w)$
 
 #figure(
 	cetz.canvas({
@@ -389,8 +389,6 @@ We use a finite element discretization. Interestingly, the stencil is the same f
 $
 mat(0, -1, 0; -1, 4, -1; 0, -1, 0)
 $
-
-
 
 #figure(
 cetz.canvas({
