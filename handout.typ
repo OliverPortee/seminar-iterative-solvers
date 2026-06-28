@@ -3,7 +3,7 @@
 #set heading(numbering: "1.")
 #set math.equation(numbering: "(1)")
 #set par(justify: true)
-#set page(numbering: "1")
+#set page(numbering: "1", margin: 1.8cm)
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
 
@@ -1009,7 +1009,7 @@ let xs = lq.linspace(0, 1, num: 250)
 let r = 3
 show lq.selector(lq.legend): set grid(row-gutter: 1em)
 figure(
-	place($(r = 3)$, dx: 106.7pt, dy: 11.5pt) +
+	place($(r = 3)$, dx: 118pt, dy: 11.5pt) +
 	lq.diagram(
 		width: 200pt,
 		xaxis: (
