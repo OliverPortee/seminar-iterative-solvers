@@ -157,6 +157,7 @@ Oliver Portee
 	r-half-steps: false,
 	u-labels: false,
 	presmoother-label: false,
+	smoother-labels: false,
 	exact-correction: false,
 	non-exact-correction: false,
 	g-labels: false,
@@ -219,6 +220,15 @@ Oliver Portee
 		})
 	}
 
+	if smoother-labels {
+		floating({
+			cetz.decorations.brace((0.7, 0.4), (4.3, 0.4), name: "presmoother")
+			content("presmoother.content", [Pre-Smoother])
+			cetz.decorations.brace((5.7, 0.4), (10.3, 0.4), name: "postsmoother")
+			content("postsmoother.content", [Post-Smoother])
+		})
+	}
+
 	if exact-correction {
 		floating({
 			content((0.5, -0.5), $u^0$)
@@ -232,7 +242,7 @@ Oliver Portee
 		floating({
 			content((4, -0.7), $u^r$)
 			content((6.15, -0.7), $u^(r + 1)$)
-			content((5, -2), $u^(r + 1) = u^r + v_1$)
+			content((5, -2), $u^(r + 1) = u^r - v_1$)
 			content((5, -2.8), $v_1 approx u^(q - 1)$)
 		})
 	}
@@ -272,6 +282,7 @@ Oliver Portee
 #figure(
 	cetz.canvas({
 		mg-scheme(
+			smoother-labels: self.subslide == 1,
 			r-half-steps: self.subslide == 2,
 			u-labels: self.subslide == 3,
 		)
@@ -522,6 +533,19 @@ $
 			align: right,
 			pad(5pt, $w$),
 		),
+		lq.ellipse(
+			-2.5, -3,
+			align: center + horizon,
+			width: 12pt,
+			height: 12pt,
+			stroke: none,
+			fill: black,
+		),
+		lq.place(
+			-2.5, -3,
+			align: left,
+			pad(10pt, $u$),
+		),
 	)
 )
 
@@ -552,7 +576,7 @@ $
 
 == Gauß-Seidel-Halbschritte als Orthogonalprojektionen
 
-#slide(repeat: 4, self => [
+#slide(repeat: 3, self => [
 #figure(
 	cetz.canvas({
 		import cetz.draw: line, content, scale, floating, circle
@@ -563,17 +587,17 @@ $
 			content((-4, 4), $v perp T_h$, anchor: "west")
 			content((-4, 3), $P_(T_h^perp) u = P_(T_h^perp) v$, anchor: "west")
 			content((5, 5), $T_h$, anchor: "west", padding: 0.3)
-			if self.subslide < 4 {
+			if self.subslide < 3 {
 				content((4.5, 1.5), $v = G_h^"I" u in T_h^perp$, anchor: "south-west", padding: 0.2)
+			}
+			if self.subslide == 3 {
+				content((4.5, 1.5), $v = P_(T_h^perp) u = G_h^"I" u$, anchor: "south-west", padding: 0.2)
 			}
 			if self.subslide >= 2 {
 				content((3, 0), $u in S_h$, anchor: "north", padding: 0.2)
 			}
 			if self.subslide >= 3 {
-				content((1.5, 1.5), $P_(T_h) u = w in T_h$, anchor: "south-east", padding: 0.2)
-			}
-			if self.subslide >= 4 {
-				content((4.5, 0.5), $v &= u - w = u - P_(T_h) u \ &= underbrace((I - P_(T_h)), G_h^"I") u$, anchor: "south-west", padding: 0.2)
+				content((1.5, 1.5), $w = P_(T_h) u$, anchor: "south-east", padding: 0.2)
 			}
 		})
 		right-angle((3, 3), start: 225deg)
@@ -635,6 +659,9 @@ $
 (||G_h^"I" u||) / (||u||) <= (||G_h^"II" G_h^"I" u||) / (||G_h^"I" u||)
 quad "analog:" quad
 (||G_h^"II" u||) / (||u||) <= (||G_h^"I" G_h^"II" u||) / (||G_h^"II" u||)
+$
+$
+==> (||u^(k + 1)||) / (||u^k||) <= (||u^(k + 2)||) / (||u^(k + 1)||) wide wide k = 0, ..., r - 2
 $
 
 == Was haben wir bereits in Teil 1 gezeigt?
@@ -881,6 +908,12 @@ figure(
 		(r = 3) \
 	$
 )
+#place(
+	bottom + left,
+	dx: 298pt,
+	dy: 23pt,
+	$rho$
+)
 
 #place(
 	top + right,
@@ -913,7 +946,7 @@ mu := cases(1 &wide& "V-cycle", 2 &wide& "W-cycle")
 $
 
 $
-||v_1 - u^(q - 1)|| < delta ||u^(q - 1)||
+||v_1 - u^(q - 1)|| <= delta ||u^(q - 1)||
 $
 
 == Exakte Grobgitterkorrektur ist Orthogonalprojektion
@@ -1172,7 +1205,7 @@ $
 delta = (delta_(q - 1))^mu \
 delta_q = max_(0 <= rho <= 1) rho^r ((1 - (delta_(q - 1))^mu) (1 - rho) / (2 - rho) + (delta_(q - 1))^mu)
 $
-Annahme: $delta_q = delta_(q - 1) = delta_"MG"$ \
+Annahme: $delta_q = delta_(q - 1) =: delta_"MG"$ \
 Löse die Gleichung
 $
 delta_"MG" = max_(0 <= rho <= 1) rho^r ((1 - (delta_"MG")^mu) (1 - rho) / (2 - rho) + (delta_"MG")^mu)
