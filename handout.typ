@@ -624,7 +624,7 @@ and combining the two displays gives $||G_h^"II" G_h^"I" u|| <= |u|$ for every $
 #hi[We note that the constant $1$ in (4.2) is best possible, since the convergence rate of the (pure) Gauss-Seidel iteration is known to be close to $1$, with $||G_h^"II" dot G_h^"I"|| = 1 - O(h^2)$.]
 
 
-= The Multigrid Algorithm
+= Presmoother and Postsmoother
 
 The multigrid algorithm consists of the presmoother, the coarse grid correction and the postsmoother.
 
@@ -690,8 +690,7 @@ $
 u^(2 r + 2) = G^1 G^2 ... G^r G^(r + 1) u^(r + 1) = tilde(G)^* u^(r + 1)
 $ <eq:Gstar>
 
-
-In part 1 we have already shown the following three statements:
+In the previous sections we have already shown the following three statements:
 
 $
 |a(v, w)| <= sqrt(1/2 (1 - (|v|^2) / (||v||^2))) ||v|| ||w|| wide v in S_H, w in T_h,
@@ -861,8 +860,6 @@ $
 v = u - w = u - P_(T_h) u = (I - P_(T_h)) u = G_h^"I" u,
 $
 where $I$ is the identity operator.
-
-#highlight[The projection theorem tells us that the split of $u$ into $u = w + v$ is unique.]
 
 Analogously, it can be shown that $G_h^"II"$ is an orthogonal projection. In this case, instead of $T_h$ we need to use the space $hat(T)_h := {w in S_h | w(p_i) = 0 "if" p_i "blue"}$
 

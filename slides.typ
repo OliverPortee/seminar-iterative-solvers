@@ -16,7 +16,7 @@
 
 #title-slide[
 #v(1fr)
-= MG Konvergenzrate
+= Multigrid Konvergenzrate nach Dietrich Braess
 
 Über die Kunst, Probleme so lange zu projizieren, bis sie konvergieren
 
