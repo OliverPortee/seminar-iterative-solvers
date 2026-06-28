@@ -347,8 +347,8 @@ $
 		let a = (0, 0)
 		let b = (6, 0)
 		let c = (4, 2)
-		line(a, b, mark: (end: ">"), name: "v")
-		line(b, c, mark: (end: ">"), name: "w")
+		line(a, b, mark: (end: ">"), name: "v", stroke: coarse-color)
+		line(b, c, mark: (end: ">"), name: "w", stroke: fine-color)
 		line(a, c, mark: (end: ">"), name: "u")
 		content("v", $v$, padding: 0.1, anchor: "north")
 		content("u", $u$, padding: 0.1, anchor: "south-east")
@@ -1230,7 +1230,7 @@ $
 
 
 #figure({
-	let xs = lq.linspace(0, 3, num: 200)
+	let xs = lq.linspace(0, 2, num: 200)
 	lq.diagram(
 		xaxis: (
 			label: $lambda$,
