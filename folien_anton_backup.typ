@@ -7,10 +7,7 @@
 
 #import "lib.typ": W, H, draw-grid, draw-coarse-grid, draw-2h-grid, draw-th-grid, fine-color, coarse-color
 
-#show: simple-theme.with(
-	aspect-ratio: "16-9",
-	footer:[Anton Wiede, #datetime.today().display("[day].[month].[year]")]
-)
+#show: simple-theme
 
 #let hi(content) = box(width: 100%, inset: 0.8em, stroke: orange, content)
 
@@ -20,7 +17,7 @@
 
 #title-slide[
 #v(1fr)
-= Multigrid Konvergenzrate nach Dietrich Braess
+= MG Konvergenzrate
 Teil 1: Grundlagen
 
 #v(1fr)
@@ -36,13 +33,16 @@ $
 u = 0 &wide& "auf" partial Omega
 $
 
+
+
+
+
+
 *FEM*: bringe Poisson Gleichung zuerst in die schwache Form
 
 $
 	integral_Omega nabla u dot nabla v = integral_Omega f dot v wide forall v in S_h
 $
-
-#hi[Im folgenden Beweis: $f = 0$ (homogenes Problem)]
 
 == Diskretisierung
 
@@ -179,7 +179,7 @@ $
 Wir wollen eine Konstante finden sodass gilt:
 
 $
-  ||u^(k+1)|| <= C dot ||u||
+  ||u^(k+1)|| <= C * ||u||
 $
 
 == Konvergenzrate Gauss-Seidel
@@ -187,13 +187,13 @@ $
 Hierfür betrachten wir zuerst die Gauss-Seidel Relaxation auf dem feinsten Gitter. Hier wollen wir zeigen, dass
 
 $
-&(1) wide |u^k| <= C dot ||u^k|| wide "(Der grobe Fehler ist kleiner als der feine)" \
-&(2) wide ||u^(k+1)|| <= |u^k| wide "(der feine Fehler" \
-&" im nächsten Schritt ist kleiner als der Grobe Fehler im vorherigen)"
+(1) wide |u^k| <= sqrt(rho) dot ||u^k|| wide "(Der grobe Fehler ist kleiner als der feine)" \
+
+(2) wide ||u^(k+1)|| <= |u^k| wide "(der feine Fehler" \ " im nächsten Schritt ist kleiner als der Grobe Fehler im vorherigen)"
 $
 
 $
-==> wide ||u^(k+1)|| <= C dot ||u^k||
+==> wide ||u^(k+1)|| <= sqrt(rho) dot ||u^k||
 $
 
 == Vergleich $|u| <= ||u||$
