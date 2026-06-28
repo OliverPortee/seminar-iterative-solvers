@@ -4,6 +4,7 @@
 #import "@preview/cetz:0.5.2"
 #import "@preview/physica:0.9.8": *
 #import "@preview/lilaq:0.6.0" as lq
+#import "@preview/tiptoe:0.4.0"
 
 #import calc: even, odd
 #import themes.simple: *
@@ -487,11 +488,42 @@ $
 	top + left,
 	dx: 464pt,
 	dy: 60pt,
-	image("images/3d-surface.png", width: 42%)
+	lq.diagram(
+		width: 10cm,
+		height: 10cm,
+		xaxis: (
+			ticks: none,
+		),
+		yaxis: (
+			ticks: none,
+		),
+		lq.contour(
+			lq.linspace(-5, 5, num: 30),
+			lq.linspace(-5, 5, num: 30),
+			(x, y) => 0.3 * (x * x + 3 * y * y - x) + 0.1,
+			map: color.map.icefire,
+		),
+		lq.line(
+			(-2.5, 0%), (-2.5, 100%)
+		),
+		lq.line(
+			(-2.5, 0), (-2.5, 2.7),
+			tip: tiptoe.triangle,
+			toe: tiptoe.circle,
+			stroke: 3pt,
+		),
+		lq.place(
+			-2.5, 0,
+			align: left,
+			pad(10pt, $v$),
+		),
+		lq.place(
+			-2.5, 1.8,
+			align: right,
+			pad(5pt, $w$),
+		),
+	)
 )
-
-#highlight[Picture is wrong! $v$ is not the global minimum]
-
 
 #box([
 $
